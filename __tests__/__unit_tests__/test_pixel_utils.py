@@ -4,7 +4,7 @@ import numpy as np
 from Utils import pixel_utils as pixel_utils
 
 
-class TestUtils(unittest.TestCase):
+class TestPixelUtils(unittest.TestCase):
 
     def test_calculate_euclidean_distances(self):
         sqrt2 = np.sqrt(2)
