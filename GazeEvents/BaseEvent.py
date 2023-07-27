@@ -8,10 +8,10 @@ from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
 
 
 class BaseEvent(ABC):
-    MIN_DURATION: float = 1        # minimum duration of an event in milliseconds
+    MIN_DURATION: float = 5        # minimum duration of an event in milliseconds
     MAX_DURATION: float = 2500     # maximum duration of an event in milliseconds
     _EVENT_TYPE: GazeEventTypeEnum
-    _MINIMUM_SAMPLES_PER_EVENT: int = 5
+    _MINIMUM_SAMPLES_PER_EVENT: int = 2
 
     def __init__(self, timestamps: np.ndarray):
         if len(timestamps) < self._MINIMUM_SAMPLES_PER_EVENT:
