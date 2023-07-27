@@ -3,7 +3,6 @@ This file contains the configuration for each specific experiment.
 """
 
 import os
-
 from Config.ScreenMonitor import ScreenMonitor
 
 # DIRECTORIES
