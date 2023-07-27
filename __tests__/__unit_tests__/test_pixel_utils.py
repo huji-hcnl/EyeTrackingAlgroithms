@@ -10,16 +10,16 @@ class TestPixelUtils(unittest.TestCase):
         sqrt2 = np.sqrt(2)
         x_coords = np.arange(0, 5)
         y_coords1 = np.arange(0, 5)
-        self.assertTrue(np.array_equal(np.array([sqrt2, sqrt2, sqrt2, sqrt2]),
+        self.assertTrue(np.array_equal(np.array([np.nan, sqrt2, sqrt2, sqrt2, sqrt2]),
                                        pixel_utils.calculate_euclidean_distances(x_coords, y_coords1),
                                        equal_nan=True))
         y_coords2 = np.zeros_like(x_coords)
-        self.assertTrue(np.array_equal(np.array([1, 1, 1, 1]),
+        self.assertTrue(np.array_equal(np.array([np.nan, 1, 1, 1, 1]),
                                        pixel_utils.calculate_euclidean_distances(x_coords, y_coords2),
                                        equal_nan=True))
         y_coords3 = y_coords1.copy().astype(float)
         y_coords3[2] = np.nan
-        self.assertTrue(np.array_equal(np.array([sqrt2, np.nan, np.nan, sqrt2]),
+        self.assertTrue(np.array_equal(np.array([np.nan, sqrt2, np.nan, np.nan, sqrt2]),
                                        pixel_utils.calculate_euclidean_distances(x_coords, y_coords3),
                                        equal_nan=True))
         y_coords4 = y_coords1[:-1].copy()
@@ -43,7 +43,6 @@ class TestPixelUtils(unittest.TestCase):
                                        equal_nan=True))
         y_coords3 = y_coords1.copy().astype(float)
         y_coords3[2] = np.nan
-        print(pixel_utils.calculate_velocities(x_coords, y_coords3, t_coords1))
         self.assertTrue(np.array_equal(np.array([np.nan, sqrt2, np.nan, np.nan, sqrt2]),
                                        pixel_utils.calculate_velocities(x_coords, y_coords3, t_coords1),
                                        equal_nan=True))

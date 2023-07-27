@@ -4,7 +4,7 @@ from typing import Tuple
 
 def calculate_euclidean_distances(xs: np.ndarray, ys: np.ndarray) -> np.ndarray:
     """
-    Calculates the Euclidean distance between subsequent pixels in the given x and y coordinates.
+    Calculates the Euclidean distance between each pixel and the previous one, in the given x and y coordinates.
     :param xs: 1D array of x coordinates
     :param ys: 1D array of y coordinates
     :return: distance (in pixel units) between subsequent pixels
@@ -13,7 +13,7 @@ def calculate_euclidean_distances(xs: np.ndarray, ys: np.ndarray) -> np.ndarray:
     x_diff = np.diff(xs)
     y_diff = np.diff(ys)
     dist = np.sqrt(np.power(x_diff, 2) + np.power(y_diff, 2))
-    return dist
+    return np.concatenate(([np.nan], dist))  # first distance is NaN
 
 
 def calculate_velocities(xs: np.ndarray, ys: np.ndarray, timestamps: np.ndarray) -> np.ndarray:
@@ -26,9 +26,9 @@ def calculate_velocities(xs: np.ndarray, ys: np.ndarray, timestamps: np.ndarray)
     """
     assert len(xs) == len(ys) == len(timestamps), "x-array, y-array and timestamps-array must be of the same length"
     dist = calculate_euclidean_distances(xs, ys)
-    dt = np.diff(timestamps)
+    dt = np.concatenate(([np.nan], np.diff(timestamps)))  # first dt is NaN
     velocities = dist / dt
-    return np.concatenate(([np.nan], velocities))  # first velocity is always NaN
+    return velocities
 
 
 def calculate_azimuth(p1: Tuple[float, float],
