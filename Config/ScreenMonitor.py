@@ -54,6 +54,14 @@ class ScreenMonitor:
             np.power(self.resolution[0], 2) + np.power(self.resolution[1], 2))  # size of diagonal in pixels
         return diagonal_length / diagonal_pixels
 
+    def pixels_to_centimeters(self, num_pixels: float) -> float:
+        """ Converts pixels to centimeters """
+        return num_pixels * self.pixel_size
+
+    def centimeters_to_pixels(self, num_centimeters: float) -> float:
+        """ Converts centimeters to pixels """
+        return num_centimeters / self.pixel_size
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__} ({self.resolution[0]}×{self.resolution[1]}@{self.refresh_rate}Hz)"
 
