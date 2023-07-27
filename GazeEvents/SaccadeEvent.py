@@ -4,6 +4,7 @@ from typing import Tuple
 
 import Config.experiment_config as cnfg
 import Utils.pixel_utils as pixel_utils
+import Utils.visual_angle_utils as visang_utils
 from GazeEvents.BaseGazeEvent import BaseGazeEvent
 from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
 
@@ -33,9 +34,9 @@ class SaccadeEvent(BaseGazeEvent):
     @property
     def amplitude(self) -> float:
         """ returns the amplitude of the saccade (visual angle) in degrees """
-        return pixel_utils.calculate_visual_angle(p1=self.start_point, p2=self.end_point,
-                                                  distance_from_screen=self._viewer_distance,
-                                                  pixel_size=cnfg.SCREEN_MONITOR.pixel_size)
+        return visang_utils.visual_angle_between_pixels(p1=self.start_point, p2=self.end_point,
+                                                        distance_from_screen=self._viewer_distance,
+                                                        pixel_size=cnfg.SCREEN_MONITOR.pixel_size)
 
     @property
     def azimuth(self) -> float:

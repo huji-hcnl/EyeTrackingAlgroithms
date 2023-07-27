@@ -74,31 +74,3 @@ def calculate_azimuth(p1: Tuple[float, float],
     if use_radians:
         return angle_rad
     return np.rad2deg(angle_rad)
-
-
-def calculate_visual_angle(p1: Tuple[float, float], p2: Tuple[float, float],
-                           distance_from_screen: float, pixel_size: float, use_radians=False) -> float:
-    """
-    Calculates the visual angle between two pixels on the screen, given that the viewer is sitting at at a distance of
-    `distance_from_screen` centimeters from the screen, and that the size of each pixel is `pixel_size` centimeters.
-    The returned value is in degrees (or radians if `use_radians` is True).
-
-    :param p1: the (x,y) coordinates of the first pixel.
-    :param p2: the (x,y) coordinates of the second pixel.
-    :param distance_from_screen: the distance (in cm) from the screen.
-    :param pixel_size: the size of each pixel (in cm).
-    :param use_radians: if True, returns the angle in radians. Otherwise, returns the angle in degrees.
-
-    :return: the visual angle between the two pixels (in degrees or radians, depending on `use_radians`). If either
-            p1 or p2 is invalid, returns np.nan.
-    """
-    x1, y1 = p1
-    x2, y2 = p2
-    if not np.isfinite(x1) or not np.isfinite(y1) or not np.isfinite(x2) or not np.isfinite(y2):
-        return np.nan
-    pixel_distance = np.sqrt(np.power(x1 - x2, 2) + np.power(y1 - y2, 2))  # distance in pixel units
-    pixel_distance_cm = pixel_distance * pixel_size  # distance in cm
-    theta = np.arctan(pixel_distance_cm / distance_from_screen)  # angle in radians
-    if use_radians:
-        return theta
-    return np.rad2deg(theta)
