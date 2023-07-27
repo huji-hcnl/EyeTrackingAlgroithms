@@ -16,6 +16,21 @@ def calculate_euclidean_distances(xs: np.ndarray, ys: np.ndarray) -> np.ndarray:
     return dist
 
 
+def calculate_velocities(xs: np.ndarray, ys: np.ndarray, timestamps: np.ndarray) -> np.ndarray:
+    """
+    Calculates the velocity of the gaze in pixels per milliseconds.
+    :param xs: 1D array of x coordinates
+    :param ys: 1D array of y coordinates
+    :param timestamps: 1D array of timestamps
+    :return: velocity (in pixel units per second) between subsequent pixels
+    """
+    assert len(xs) == len(ys) == len(timestamps), "x-array, y-array and timestamps-array must be of the same length"
+    dist = calculate_euclidean_distances(xs, ys)
+    dt = np.diff(timestamps)
+    velocities = dist / dt
+    return np.concatenate(([np.nan], velocities))  # first velocity is always NaN
+
+
 def calculate_azimuth(p1: Tuple[float, float],
                       p2: Tuple[float, float],
                       zero_direction: str = 'E',
