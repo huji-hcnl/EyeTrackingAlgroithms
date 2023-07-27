@@ -67,6 +67,18 @@ class BaseEvent(ABC):
                                self.get_outlier_reasons()],
                          index=["event_type", "start_time", "end_time", "duration", "is_outlier", "outlier_reasons"])
 
+    @final
+    def get_timestamps(self, round_decimals: int = 1, zero_corrected: bool = True) -> np.ndarray:
+        """
+        Returns the timestamps of the event, rounded to the specified number of decimals.
+        If zero_corrected is True, the timestamps will be relative to the first timestamp of the event.
+        """
+        timestamps = self._timestamps  # timestamps in milliseconds
+        if zero_corrected:
+            timestamps = timestamps - timestamps[0]  # start from 0
+        timestamps = np.round(timestamps, decimals=round_decimals)
+        return timestamps
+
     @classmethod
     @final
     def event_type(cls) -> GazeEventTypeEnum:
