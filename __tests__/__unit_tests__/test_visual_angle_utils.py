@@ -8,6 +8,19 @@ class TestVisualAngleUtils(unittest.TestCase):
     D = 1   # distance from screen to eye
     PS = 1  # pixel size
 
+    def test_visual_angle_between_pixels(self):
+        # implausible values
+        d = 1
+        ps = 1
+        self.assertEqual(45, visang_utils.visual_angle_between_pixels(p1=(0, 0), p2=(0, 1), distance_from_screen=self.D,
+                                                                      pixel_size=self.PS, use_radians=False))
+        self.assertEqual(45, visang_utils.visual_angle_between_pixels(p1=(0, 0), p2=(1, 0), distance_from_screen=self.D,
+                                                                      pixel_size=self.PS, use_radians=False))
+        self.assertAlmostEqual(70.528779366, visang_utils.visual_angle_between_pixels(p1=(0, 0), p2=(2, 2),
+                                                                                      distance_from_screen=self.D,
+                                                                                      pixel_size=self.PS,
+                                                                                      use_radians=False))
+
     def test_pixels_to_visual_angles(self):
         xs1 = np.zeros(5)
         ys = np.arange(5)

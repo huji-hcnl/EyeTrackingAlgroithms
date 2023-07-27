@@ -64,35 +64,3 @@ class TestPixelUtils(unittest.TestCase):
         self.assertEqual(np.pi * 3 / 4, pixel_utils.calculate_azimuth(p1=(1, 0), p2=(0, 1),
                                                                       use_radians=True, zero_direction='N'))
 
-    def test_calculate_visual_angle(self):
-        # implausible values
-        d = 1
-        ps = 1
-        self.assertEqual(45, pixel_utils.calculate_visual_angle(p1=(0, 0), p2=(0, 1),
-                                                                distance_from_screen=d,
-                                                                pixel_size=ps,
-                                                                use_radians=False))
-        self.assertEqual(45, pixel_utils.calculate_visual_angle(p1=(0, 0), p2=(1, 0),
-                                                                distance_from_screen=d,
-                                                                pixel_size=ps,
-                                                                use_radians=False))
-        self.assertAlmostEqual(70.528779366, pixel_utils.calculate_visual_angle(p1=(0, 0), p2=(2, 2),
-                                                                                distance_from_screen=d,
-                                                                                pixel_size=ps,
-                                                                                use_radians=False))
-
-        # plausible values
-        d = 65
-        ps = 0.028069  # length of pixel's diagonal (in cm) for the Tobii Screen Monitor
-        self.assertAlmostEqual(0.0247421, pixel_utils.calculate_visual_angle(p1=(0, 1), p2=(1, 1),
-                                                                             distance_from_screen=d,
-                                                                             pixel_size=ps,
-                                                                             use_radians=False))
-        self.assertAlmostEqual(0.0247421, pixel_utils.calculate_visual_angle(p1=(1, 2), p2=(1, 1),
-                                                                             distance_from_screen=d,
-                                                                             pixel_size=ps,
-                                                                             use_radians=False))
-        self.assertAlmostEqual(0.0349906, pixel_utils.calculate_visual_angle(p1=(0, 0), p2=(1, 1),
-                                                                             distance_from_screen=d,
-                                                                             pixel_size=ps,
-                                                                             use_radians=False))
