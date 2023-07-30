@@ -41,7 +41,7 @@ class BaseDetector(ABC):
         :return: list of GazeEventTypeEnum values, where each value indicates the type of event that is detected at the
             corresponding index in the given gaze data
         """
-        x, y = self.__verify_inputs(x, y)
+        x, y = self._verify_inputs(x, y)
         candidates = self._identify_event_candidates(x, y)
         candidates = arr_utils.fill_short_chunks(arr=candidates,
                                                  min_chunk_length=self._minimum_samples_within_event,
@@ -85,6 +85,17 @@ class BaseDetector(ABC):
     def _identify_event_candidates(self, x: np.ndarray, y: np.ndarray) -> List[GazeEventTypeEnum]:
         raise NotImplementedError
 
+    def _verify_inputs(self, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        if not arr_utils.is_one_dimensional(x):
+            raise ValueError("x must be one-dimensional")
+        if not arr_utils.is_one_dimensional(y):
+            raise ValueError("y must be one-dimensional")
+        x = x.reshape(-1)
+        y = y.reshape(-1)
+        if len(x) != len(y):
+            raise ValueError("x and y must have the same length")
+        return x, y
+
     @property
     @final
     def _minimum_samples_within_event(self) -> int:
@@ -96,18 +107,6 @@ class BaseDetector(ABC):
     def _minimum_samples_between_identical_events(self) -> int:
         """ minimum number of samples between identical events """
         return int(self._MINIMUM_TIME_BETWEEN_IDENTICAL_EVENTS * self._sr / 1000)
-
-    @staticmethod
-    def __verify_inputs(x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        if not arr_utils.is_one_dimensional(x):
-            raise ValueError("x must be one-dimensional")
-        if not arr_utils.is_one_dimensional(y):
-            raise ValueError("y must be one-dimensional")
-        x = x.reshape(-1)
-        y = y.reshape(-1)
-        if len(x) != len(y):
-            raise ValueError("x and y must have the same length")
-        return x, y
 
 
 
