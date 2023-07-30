@@ -43,9 +43,7 @@ class BaseDetector(ABC):
         """
         x, y = self._verify_inputs(x, y)
         candidates = self._identify_event_candidates(x, y)
-        candidates = arr_utils.fill_short_chunks(arr=candidates,
-                                                 min_chunk_length=self._minimum_samples_within_event,
-                                                 fill_value=GazeEventTypeEnum.UNDEFINED)
+        candidates = self._set_short_chunks_as_undefined(candidates)
         candidates = arr_utils.merge_proximal_chunks(arr=candidates,
                                                      min_chunk_length=self._minimum_samples_between_identical_events,
                                                      allow_short_chunks_of=set())
@@ -96,14 +94,27 @@ class BaseDetector(ABC):
             raise ValueError("x and y must have the same length")
         return x, y
 
+    @final
+    def _set_short_chunks_as_undefined(self, arr) -> List[GazeEventTypeEnum]:
+        """
+        If a "chunk" of identical values is shorter than `self._minimum_samples_within_event`, we fill the indices of
+        said chunk with value GazeEventTypeEnum.UNDEFINED.
+        """
+        arr_copy = np.copy(arr)
+        chunk_indices = arr_utils.get_chunk_indices(arr)
+        for chunk_idx in chunk_indices:
+            if len(chunk_idx) < self._minimum_samples_within_event:
+                arr_copy[chunk_idx] = GazeEventTypeEnum.UNDEFINED
+        return arr_copy.tolist()
+
     @property
     @final
     def _minimum_samples_within_event(self) -> int:
         """ minimum number of samples within a single event """
-        return int(self._MINIMUM_TIME_WITHIN_EVENT * self._sr / 1000)
+        return round(self._MINIMUM_TIME_WITHIN_EVENT * self._sr / 1000)
 
     @property
     @final
     def _minimum_samples_between_identical_events(self) -> int:
         """ minimum number of samples between identical events """
-        return int(self._MINIMUM_TIME_BETWEEN_IDENTICAL_EVENTS * self._sr / 1000)
+        return round(self._MINIMUM_TIME_BETWEEN_IDENTICAL_EVENTS * self._sr / 1000)

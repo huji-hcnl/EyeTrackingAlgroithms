@@ -30,17 +30,6 @@ class TestIOUtils(unittest.TestCase):
         exp = [np.array([i]) for i in range(10)]
         self.assertTrue(all([np.array_equal(o, e, equal_nan=True) for o, e in zip(obs, exp)]))
 
-    def test_fill_short_chunks(self):
-        lst = [1.0, 1, 1, 1, 0, 0, 1, 1, 1, 1]
-        obs = arr_utils.fill_short_chunks(lst, min_chunk_length=3)
-        exp = [1, 1, 1, 1, np.nan, np.nan, 1, 1, 1, 1]
-        self.assertTrue(np.array_equal(obs, exp, equal_nan=True))
-
-        lst = [1, 1, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 0, 0, 2, 2, 2]
-        obs = arr_utils.fill_short_chunks(lst, min_chunk_length=3, fill_value=3)
-        exp = [3, 3, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 2, 2, 2]
-        self.assertTrue(np.array_equal(obs, exp))
-
     def test_merge_proximal_chunks(self):
         lst = [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2]
 

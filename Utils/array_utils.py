@@ -25,23 +25,6 @@ def get_chunk_indices(arr) -> List[np.ndarray]:
     return chunk_indices
 
 
-def fill_short_chunks(arr, min_chunk_length: int, fill_value = np.nan) -> np.ndarray:
-    """
-    If a "chunk" of identical values is shorter than `min_chunk_length`, fills the chunk with the given `fill_value`.
-    """
-    if not is_one_dimensional(arr):
-        raise ValueError("arr must be one-dimensional")
-    if min_chunk_length <= 0:
-        raise ValueError("argument `min_chunk_length` must be >= 1")
-
-    arr_copy = np.asarray(arr).copy()
-    chunk_indices = get_chunk_indices(arr)
-    for chunk_idx in chunk_indices:
-        if len(chunk_idx) < min_chunk_length:
-            arr_copy[chunk_idx] = fill_value
-    return arr_copy
-
-
 def merge_proximal_chunks(arr, min_chunk_length: int, allow_short_chunks_of: Set = None) -> np.ndarray:
     """
     If two "chunks" of identical values are separated by a short "chunk" of other values, merges the two chunks into one
