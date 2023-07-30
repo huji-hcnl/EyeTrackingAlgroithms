@@ -8,6 +8,18 @@ from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
 
 
 class BaseDetector(ABC):
+    """
+    Base class for gaze event detectors, that segment eye-tracking data into separate events, such as blinks, saccades,
+    fixations, etc.
+    The detection process is implemented in detect_candidates_monocular() and detect_candidates_binocular() and is the
+    same for all detectors. Detection steps are as follows:
+    1. Detecting event candidates using unique algorithms for each detector (implemented in _identify_event_candidates())
+    2. Filling short chunks of event candidates with GazeEventTypeEnum.UNDEFINED
+    3. Merging chunks of identical event candidates that are close to each other
+    4. If binocular data is available, candidates from both eyes are merged into a single list of candidates based on
+    pre-defined logic (e.g. both eyes must detect a candidate for it to be considered a binocular candidate).
+    """
+
     _MINIMUM_TIME_WITHIN_EVENT: float = 5  # min duration of single event (in milliseconds)
     _MINIMUM_TIME_BETWEEN_IDENTICAL_EVENTS: float = 5  # min duration between identical events (in milliseconds)
 
