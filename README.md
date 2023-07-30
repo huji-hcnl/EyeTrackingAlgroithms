@@ -24,10 +24,15 @@ LoadAnderssonData.py:
 
 Detectors- implemented algorithms to detect types of events in eye movements:
 1. IVT- IVTDetector.py:
-    Input: velocity threshold to distinguish between fixation and saccades. Default = 0.5
-    Output: np ndarray of labels (1 or 2 only)
+    * Input: velocity threshold to distinguish between fixation and saccades. Default = 0.5
+    * Output: np ndarray of labels (1 or 2 only)
     - calculates the velocity between to samples (= location of the eye, xy coordinates)
     - thresholding the velocity and determining labels
-3. IDT- IDTDetector.py:
+2. IDT- IDTDetector.py:
+    * Input: dispersion threshold to distinguish between fixation and saccades. Default = 3.5 px
+            window dimension to calculate dispersion by the min and max of the samples in the window.
+    * Our dispersion calculation (according to the article: "Review and Evaluation of Eye Movement Event
+Detection Algorithms" by Birtukan Birawo and Pawel Kasprowski): D = [max(x) - min(x)] + [max(y) - min(y)]
+    * Output: np ndarray of labels (1 or 2 only)
     
     
