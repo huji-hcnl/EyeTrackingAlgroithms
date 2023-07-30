@@ -14,24 +14,62 @@ class BaseDetector(ABC):
         self._sr = sr  # sampling rate in Hz
 
     @final
-    def detect_monocular(self, x: np.ndarray, y: np.ndarray) -> List[GazeEventTypeEnum]:
+    def detect_candidates_monocular(self, x: np.ndarray, y: np.ndarray) -> List[GazeEventTypeEnum]:
+        """
+        Detects event-candidates in the given gaze data from a single eye. Detection steps:
+        1. Find event candidates based on each Detector's implementation of _identify_event_candidates()
+        2. Fill short chunks of event candidates with GazeEventTypeEnum.UNDEFINED
+        3. Merge chunks of identical event candidates that are close to each other
+
+        :param x: x-coordinates of gaze data from a single eye
+        :param y: y-coordinates of gaze data from a single eye
+
+        :return: list of GazeEventTypeEnum values, where each value indicates the type of event that is detected at the
+            corresponding index in the given gaze data
+        """
         x, y = self.__verify_inputs(x, y)
         candidates = self._identify_event_candidates(x, y)
-        return None
+        candidates = arr_utils.fill_short_chunks(arr=candidates,
+                                                 min_chunk_length=self._minimum_samples_within_event,
+                                                 fill_value=GazeEventTypeEnum.UNDEFINED)
+        candidates = arr_utils.merge_proximal_chunks(arr=candidates,
+                                                     min_chunk_length=self._minimum_samples_between_identical_events,
+                                                     allow_short_chunks_of=set())
+        candidates = candidates.tolist()
+        return candidates
+
+    @final
+    def detect_candidates_binocular(self,
+                                    x_l: np.ndarray, y_l: np.ndarray,
+                                    x_r: np.ndarray, y_r: np.ndarray,
+                                    detect_by: str = 'both') -> List[GazeEventTypeEnum]:
+        left_candidates = self.detect_candidates_monocular(x=x_l, y=y_l)
+        right_candidates = self.detect_candidates_monocular(x=x_r, y=y_r)
+
+        detect_by = detect_by.lower()
+        if detect_by == "left":
+            return left_candidates
+        if detect_by == "right":
+            return right_candidates
+
+        assert len(left_candidates) == len(right_candidates)
+        if detect_by in ["both", "and"]:
+            # only keep candidates that are detected by both eyes
+            both_candidates = [left_cand if left_cand == right_cand else GazeEventTypeEnum.UNDEFINED
+                               for left_cand, right_cand in zip(left_candidates, right_candidates)]
+            return both_candidates
+        if detect_by in ["either", "or"]:
+            either_candidates = [left_cand or right_cand for left_cand, right_cand
+                                 in zip(left_candidates, right_candidates)]
+            return either_candidates
+
+        # TODO: support more complex logic: fixations & blinks are monocular, saccades are binocular, etc.
+
+        raise ValueError(f"invalid value for `detect_by`: {detect_by}")
 
     @abstractmethod
     def _identify_event_candidates(self, x: np.ndarray, y: np.ndarray) -> List[GazeEventTypeEnum]:
         raise NotImplementedError
-
-    @final
-    def clear_short_candidates(self, candidates: List[GazeEventTypeEnum]) -> List[GazeEventTypeEnum]:
-        """
-        Removes candidates that are too short to be events
-        :param candidates: list of candidates
-        :return: list of candidates without short candidates
-        """
-        # TODO: implement
-        return candidates
 
     @property
     @final
