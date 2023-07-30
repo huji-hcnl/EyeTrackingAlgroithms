@@ -97,9 +97,15 @@ class BaseDetector(ABC):
         Identifies blink candidates in the given gaze data from a single eye, and removes them from the gaze data.
         Returns the modified gaze data and a list of event candidates including where the blinks were detected.
         """
-        # TODO: implement
         candidates = [GazeEventTypeEnum.UNDEFINED] * len(x)
-        raise NotImplementedError
+        candidates[np.isnan(x) | np.isnan(y)] = GazeEventTypeEnum.BLINK
+
+        # TODO: add blink correction before/after NaNs
+
+        candidates_arr = np.array(candidates)
+        x[candidates_arr == GazeEventTypeEnum.BLINK] = np.nan
+        y[candidates_arr == GazeEventTypeEnum.BLINK] = np.nan
+        return x, y, candidates
 
     @abstractmethod
     def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray,
