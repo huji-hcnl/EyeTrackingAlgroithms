@@ -68,7 +68,6 @@ class EngbertDetector(BaseDetector):
             velocities[t] = diff * (self._sr / (2 * (ws + 1)))
         return velocities
 
-
     @staticmethod
     def _median_standard_deviation(arr) -> float:
         """
