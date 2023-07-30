@@ -22,3 +22,22 @@ class TestBaseDetector(unittest.TestCase):
                     [GazeEventTypeEnum.UNDEFINED] * 1 +
                     [GazeEventTypeEnum.FIXATION] * 2)
         self.assertEqual(self.DETECTOR._set_short_chunks_as_undefined(arr), expected)
+
+    def test_merge_proximal_chunks_of_identical_values(self):
+        arr = []
+        self.assertEqual(self.DETECTOR._merge_proximal_chunks_of_identical_values(arr), [])
+
+        arr = ([GazeEventTypeEnum.FIXATION] * 3 +
+               [GazeEventTypeEnum.UNDEFINED] * 1 +
+               [GazeEventTypeEnum.FIXATION] * 2)
+        expected = ([GazeEventTypeEnum.FIXATION] * 6)
+        self.assertEqual(self.DETECTOR._merge_proximal_chunks_of_identical_values(arr), expected)
+
+        arr = ([GazeEventTypeEnum.FIXATION] * 3 +
+               [GazeEventTypeEnum.SACCADE] * 1 +
+               [GazeEventTypeEnum.FIXATION] * 2)
+        expected = arr
+        self.assertEqual(self.DETECTOR._merge_proximal_chunks_of_identical_values(arr,
+                                                                                  allow_short_chunks_of={
+                                                                                      GazeEventTypeEnum.SACCADE}),
+                         expected)

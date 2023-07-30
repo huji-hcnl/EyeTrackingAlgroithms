@@ -1,6 +1,6 @@
 import numpy as np
 from abc import ABC, abstractmethod
-from typing import final, List, Tuple
+from typing import final, List, Tuple, Set
 
 import constants as cnst
 import Utils.array_utils as arr_utils
@@ -44,10 +44,7 @@ class BaseDetector(ABC):
         x, y = self._verify_inputs(x, y)
         candidates = self._identify_event_candidates(x, y)
         candidates = self._set_short_chunks_as_undefined(candidates)
-        candidates = arr_utils.merge_proximal_chunks(arr=candidates,
-                                                     min_chunk_length=self._minimum_samples_between_identical_events,
-                                                     allow_short_chunks_of=set())
-        candidates = candidates.tolist()
+        candidates = self._merge_proximal_chunks_of_identical_values(candidates)
         return candidates
 
     @final
@@ -105,6 +102,41 @@ class BaseDetector(ABC):
         for chunk_idx in chunk_indices:
             if len(chunk_idx) < self._minimum_samples_within_event:
                 arr_copy[chunk_idx] = GazeEventTypeEnum.UNDEFINED
+        return arr_copy.tolist()
+
+    @final
+    def _merge_proximal_chunks_of_identical_values(self, arr,
+                                                   allow_short_chunks_of: Set = None) -> List[GazeEventTypeEnum]:
+        """
+        If two "chunks" of identical values are separated by a short "chunk" of other values, merges the two chunks into
+        one chunk by filling the middle chunk with the value of the left chunk.
+        Chunks with values specified in `allow_short_chunks_of` are not merged.
+        """
+        if allow_short_chunks_of is None or len(allow_short_chunks_of) == 0:
+            allow_short_chunks_of = set()
+
+        arr_copy = np.asarray(arr).copy()
+        chunk_indices = arr_utils.get_chunk_indices(arr)
+        for i, middle_chunk in enumerate(chunk_indices):
+            if i == 0 or i == len(chunk_indices) - 1:
+                # ignore the first and last chunk
+                continue
+            if len(middle_chunk) >= self._minimum_samples_between_identical_events:
+                # ignore chunks that are long enough
+                continue
+            middle_chunk_value = arr_copy[middle_chunk[0]]
+            if middle_chunk_value in allow_short_chunks_of:
+                # ignore chunks of the specified types
+                continue
+            left_chunk_value = arr_copy[chunk_indices[i - 1][0]]
+            right_chunk_value = arr_copy[chunk_indices[i + 1][0]]
+            if left_chunk_value != right_chunk_value:
+                # ignore middle chunks if the left and right chunks are not identical
+                continue
+
+            # reached here if the middle chunk is short, its value is not allowed to be short, and left and right chunks
+            # are identical. merge the left and right chunks by filling `middle_chunk` with the value of `left_chunk`.
+            arr_copy[middle_chunk] = left_chunk_value
         return arr_copy.tolist()
 
     @property
