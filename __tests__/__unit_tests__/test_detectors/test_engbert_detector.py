@@ -55,7 +55,3 @@ class TestEngbertDetector(unittest.TestCase):
         arr = np.arange(11).astype(float)
         arr[5] = np.nan
         self.assertEqual(self.DETECTOR._median_standard_deviation(arr), 1)
-
-
-
-
