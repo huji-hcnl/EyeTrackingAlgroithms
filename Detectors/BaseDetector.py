@@ -2,6 +2,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 from typing import final, List, Tuple
 
+import constants as cnst
 import Utils.array_utils as arr_utils
 from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
 
@@ -47,9 +48,9 @@ class BaseDetector(ABC):
         right_candidates = self.detect_candidates_monocular(x=x_r, y=y_r)
 
         detect_by = detect_by.lower()
-        if detect_by == "left":
+        if detect_by == cnst.LEFT:
             return left_candidates
-        if detect_by == "right":
+        if detect_by == cnst.RIGHT:
             return right_candidates
 
         assert len(left_candidates) == len(right_candidates)
