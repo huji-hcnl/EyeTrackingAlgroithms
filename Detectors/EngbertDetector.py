@@ -35,8 +35,21 @@ class EngbertDetector(BaseDetector):
         self._lambda_noise_threshold = lambda_noise_threshold
         self._derivation_window_size = round(derivation_window_size)
 
-    def _identify_event_candidates(self, x: np.ndarray, y: np.ndarray) -> List[GazeEventTypeEnum]:
-        raise NotImplementedError
+    def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray,
+                                        candidates: List[GazeEventTypeEnum]) -> List[GazeEventTypeEnum]:
+        x_velocity = self._calculate_axial_velocity(x)
+        x_std = self._median_standard_deviation(x_velocity)
+        x_noise_threshold = self._lambda_noise_threshold * x_std
+
+        y_velocity = self._calculate_axial_velocity(y)
+        y_std = self._median_standard_deviation(y_velocity)
+        y_noise_threshold = self._lambda_noise_threshold * y_std
+
+        ellipse = (x_velocity / x_noise_threshold) ** 2 + (y_velocity / y_noise_threshold) ** 2
+        candidates_array = np.array(candidates)
+        candidates_array[ellipse < 1] = GazeEventTypeEnum.FIXATION
+        candidates_array[ellipse >= 1] = GazeEventTypeEnum.SACCADE
+        return candidates_array.tolist()
 
     def _verify_inputs(self, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         x, y = super()._verify_inputs(x, y)
