@@ -45,7 +45,8 @@ class BaseDetector(ABC):
             corresponding index in the given gaze data
         """
         x, y = self._verify_inputs(x, y)
-        candidates = self._identify_gaze_event_candidates(x, y)
+        x, y, candidates = self._identify_blink_candidates(x, y)
+        candidates = self._identify_gaze_event_candidates(x, y, candidates)
         candidates = self._set_short_chunks_as_undefined(candidates)
         candidates = self._merge_proximal_chunks_of_identical_values(candidates)
         return candidates
@@ -79,15 +80,6 @@ class BaseDetector(ABC):
 
         raise ValueError(f"invalid value for `detect_by`: {detect_by}")
 
-    @abstractmethod
-    def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray) -> List[GazeEventTypeEnum]:
-        """
-        Identifies event candidates in the given gaze data from a single eye. The returned list should be the same
-        length as the given gaze data, where each value indicates the type of event that is detected at the corresponding
-        index in the given gaze data.
-        """
-        raise NotImplementedError
-
     def _verify_inputs(self, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         if not arr_utils.is_one_dimensional(x):
             raise ValueError("x must be one-dimensional")
@@ -100,11 +92,21 @@ class BaseDetector(ABC):
         return x, y
 
     @final
-    def _identify_blink_candidates(self, x: np.ndarray, y: np.ndarray) -> List[GazeEventTypeEnum]:
+    def _identify_blink_candidates(self, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray, List[GazeEventTypeEnum]]:
         """
-        Identifies blink candidates in the given gaze data from a single eye
+        Identifies blink candidates in the given gaze data from a single eye, and removes them from the gaze data.
+        Returns the modified gaze data and a list of event candidates including where the blinks were detected.
         """
         # TODO: implement
+        candidates = [GazeEventTypeEnum.UNDEFINED] * len(x)
+        raise NotImplementedError
+
+    @abstractmethod
+    def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray,
+                                        candidates: List[GazeEventTypeEnum]) -> List[GazeEventTypeEnum]:
+        """
+        Identifies gaze-event (fixations, saccades, etc.) candidates in the given gaze data from a single eye
+        """
         raise NotImplementedError
 
     @final
