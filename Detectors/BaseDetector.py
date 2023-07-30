@@ -14,7 +14,7 @@ class BaseDetector(ABC):
         self._sr = sr  # sampling rate in Hz
 
     @final
-    def detect_monocular(self, x: np.ndarray, y: np.ndarray):
+    def detect_monocular(self, x: np.ndarray, y: np.ndarray) -> List[GazeEventTypeEnum]:
         x, y = self.__verify_inputs(x, y)
         candidates = self._identify_event_candidates(x, y)
         return None
