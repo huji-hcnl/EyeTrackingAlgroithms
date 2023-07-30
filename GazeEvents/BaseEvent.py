@@ -18,7 +18,7 @@ class BaseEvent(ABC):
             raise ValueError("event must be at least {} samples long".format(self._MINIMUM_SAMPLES_PER_EVENT))
         if np.isnan(timestamps).any() or np.isinf(timestamps).any():
             raise ValueError("array `timestamps` must not contain NaN or infinite values")
-        if (timestamps < 0).any():
+        if np.any(timestamps < 0):
             raise ValueError("array `timestamps` must not contain negative values")
         self._timestamps = timestamps
 
