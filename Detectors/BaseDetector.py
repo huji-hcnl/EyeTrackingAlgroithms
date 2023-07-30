@@ -107,9 +107,3 @@ class BaseDetector(ABC):
     def _minimum_samples_between_identical_events(self) -> int:
         """ minimum number of samples between identical events """
         return int(self._MINIMUM_TIME_BETWEEN_IDENTICAL_EVENTS * self._sr / 1000)
-
-
-
-
-
-
