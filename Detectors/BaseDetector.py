@@ -13,10 +13,12 @@ class BaseDetector(ABC):
     fixations, etc.
     The detection process is implemented in detect_candidates_monocular() and detect_candidates_binocular() and is the
     same for all detectors. Detection steps are as follows:
-    1. Detecting event candidates using unique algorithms for each detector (implemented in _identify_event_candidates())
-    2. Filling short chunks of event candidates with GazeEventTypeEnum.UNDEFINED
-    3. Merging chunks of identical event candidates that are close to each other
-    4. If binocular data is available, candidates from both eyes are merged into a single list of candidates based on
+    1. Verify the input is valid
+    2. Detecting blink candidates based on missing data in the recorded gaze data
+    3. Detecting event candidates using unique algorithms for each detector (implemented in _identify_event_candidates())
+    4. Filling short chunks of event candidates with GazeEventTypeEnum.UNDEFINED
+    5. Merging chunks of identical event candidates that are close to each other
+    6. If binocular data is available, candidates from both eyes are merged into a single list of candidates based on
     pre-defined logic (e.g. both eyes must detect a candidate for it to be considered a binocular candidate).
     """
 
@@ -31,9 +33,10 @@ class BaseDetector(ABC):
         """
         Detects event-candidates in the given gaze data from a single eye. Detection steps:
         1. Verify that x and y are valid inputs
-        2. Find event candidates based on each Detector's implementation of _identify_event_candidates()
-        3. Fill short chunks of event candidates with GazeEventTypeEnum.UNDEFINED
-        4. Merge chunks of identical event candidates that are close to each other
+        2. Detect blink candidates when there is missing gaze data
+        3. Find event candidates based on each Detector's implementation of _identify_event_candidates()
+        4. Fill short chunks of event candidates with GazeEventTypeEnum.UNDEFINED
+        5. Merge chunks of identical event candidates that are close to each other
 
         :param x: x-coordinates of gaze data from a single eye
         :param y: y-coordinates of gaze data from a single eye
@@ -42,7 +45,7 @@ class BaseDetector(ABC):
             corresponding index in the given gaze data
         """
         x, y = self._verify_inputs(x, y)
-        candidates = self._identify_event_candidates(x, y)
+        candidates = self._identify_gaze_event_candidates(x, y)
         candidates = self._set_short_chunks_as_undefined(candidates)
         candidates = self._merge_proximal_chunks_of_identical_values(candidates)
         return candidates
@@ -77,7 +80,12 @@ class BaseDetector(ABC):
         raise ValueError(f"invalid value for `detect_by`: {detect_by}")
 
     @abstractmethod
-    def _identify_event_candidates(self, x: np.ndarray, y: np.ndarray) -> List[GazeEventTypeEnum]:
+    def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray) -> List[GazeEventTypeEnum]:
+        """
+        Identifies event candidates in the given gaze data from a single eye. The returned list should be the same
+        length as the given gaze data, where each value indicates the type of event that is detected at the corresponding
+        index in the given gaze data.
+        """
         raise NotImplementedError
 
     def _verify_inputs(self, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
@@ -90,6 +98,14 @@ class BaseDetector(ABC):
         if len(x) != len(y):
             raise ValueError("x and y must have the same length")
         return x, y
+
+    @final
+    def _identify_blink_candidates(self, x: np.ndarray, y: np.ndarray) -> List[GazeEventTypeEnum]:
+        """
+        Identifies blink candidates in the given gaze data from a single eye
+        """
+        # TODO: implement
+        raise NotImplementedError
 
     @final
     def _set_short_chunks_as_undefined(self, arr) -> List[GazeEventTypeEnum]:
