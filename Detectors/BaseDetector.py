@@ -30,9 +30,10 @@ class BaseDetector(ABC):
     def detect_candidates_monocular(self, x: np.ndarray, y: np.ndarray) -> List[GazeEventTypeEnum]:
         """
         Detects event-candidates in the given gaze data from a single eye. Detection steps:
-        1. Find event candidates based on each Detector's implementation of _identify_event_candidates()
-        2. Fill short chunks of event candidates with GazeEventTypeEnum.UNDEFINED
-        3. Merge chunks of identical event candidates that are close to each other
+        1. Verify that x and y are valid inputs
+        2. Find event candidates based on each Detector's implementation of _identify_event_candidates()
+        3. Fill short chunks of event candidates with GazeEventTypeEnum.UNDEFINED
+        4. Merge chunks of identical event candidates that are close to each other
 
         :param x: x-coordinates of gaze data from a single eye
         :param y: y-coordinates of gaze data from a single eye
