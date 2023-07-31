@@ -9,6 +9,8 @@ from DataParsers.BaseEyeTrackerParser import BaseEyeTrackerParser
 class TobiiEyeTrackerCSVParser(BaseEyeTrackerParser):
     """
     Parses eye-tracking data based on the CSV format exported by Tobii eye-tracker and E-Prime.
+    See information on the raw data format under "Tutorial 2 // Task 7" (page 56) in E-Prime's user manual for the Tobii
+    eye-tracker (TET) package: https://pstnet.com/wp-content/uploads/2019/05/EET_User_Guide_3.2.pdf
     """
 
     def parse(self, input_path: str,
