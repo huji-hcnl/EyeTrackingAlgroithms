@@ -110,6 +110,7 @@ class BaseEyeTrackerParser(ABC):
         raise NotImplementedError
 
     @classmethod
+    @final
     def _raise_for_invalid_input_path(cls, input_path: str):
         if not os.path.exists(input_path):
             raise FileNotFoundError(f"Input file '{input_path}' does not exist.")
