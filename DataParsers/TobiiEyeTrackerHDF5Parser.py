@@ -13,9 +13,6 @@ class TobiiEyeTrackerHDF5Parser(BaseEyeTrackerParser):
     See additional information here: https://psychopy.org/hardware/eyeTracking.html#what-about-the-data
     """
 
-    def parse(self, input_path: str, *args) -> pd.DataFrame:
-        raise NotImplementedError
-
     @classmethod
     def _read_raw_data(cls, input_path: str):
         """
@@ -43,6 +40,10 @@ class TobiiEyeTrackerHDF5Parser(BaseEyeTrackerParser):
                 for i, col in enumerate(colnames):
                     data_dict[col].append(row[i])
         return pd.DataFrame(data_dict)
+
+    @classmethod
+    def _perform_additional_parsing(cls, df: pd.DataFrame) -> pd.DataFrame:
+        return df  # no additional parsing needed
 
     @classmethod
     def FILE_EXTENSION(cls) -> str:
