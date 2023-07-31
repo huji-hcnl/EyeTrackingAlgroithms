@@ -17,6 +17,7 @@ class BaseEyeTrackerParser(ABC):
 
     _DEFAULT_MISSING_VALUE = np.nan
 
+    @final
     def __init__(self, additional_columns: Optional[List[str]] = None):
         if additional_columns is None:
             additional_columns = []
