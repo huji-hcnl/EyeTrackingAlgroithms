@@ -37,6 +37,21 @@ class BaseEyeTrackerParser(ABC):
     def _read_raw_data(cls, input_path: str) -> pd.DataFrame:
         raise NotImplementedError
 
+    @final
+    def _keep_relevant_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Removes all columns from the DataFrame that are not relevant for the analysis, and replaces missing values with
+        the default missing value.
+        """
+        new_df = df.drop(columns=[col for col in df.columns if col not in self.columns])
+        new_df.replace(dict.fromkeys(self.MISSING_VALUES(), self._DEFAULT_MISSING_VALUE), inplace=True)
+        return new_df
+
+    @final
+    @property
+    def columns(self) -> List[str]:
+        return self._get_common_columns() + self._additional_columns
+
     @classmethod
     @abstractmethod
     def FILE_EXTENSION(cls) -> str:
