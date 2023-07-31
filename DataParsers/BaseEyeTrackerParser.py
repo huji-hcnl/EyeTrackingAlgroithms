@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Union, Set, Tuple, final
 
 import constants as cnst
+from Config import experiment_config as cnfg
 
 
 class BaseEyeTrackerParser(ABC):
@@ -22,9 +23,15 @@ class BaseEyeTrackerParser(ABC):
         self._additional_columns: List[str] = list(filter(lambda col: self.__is_valid_column_name(col),
                                                           additional_columns))
 
-    @abstractmethod
-    def parse(self, input_path: str, *args) -> pd.DataFrame:
-        raise NotImplementedError
+    @final
+    def parse(self, input_path: str,
+              screen_resolution: Tuple[float, float] = cnfg.SCREEN_MONITOR.resolution) -> pd.DataFrame:
+        df = self._read_raw_data(input_path)
+        df = self._keep_relevant_data(df)
+        df = self._correct_gaze_for_screen_resolution(df, screen_resolution)
+        df = self._perform_additional_parsing(df)
+        df = self._reorder_and_rename_columns(df)
+        return df
 
     @final
     def parse_and_split_by_trial(self, input_path: str) -> List[pd.DataFrame]:

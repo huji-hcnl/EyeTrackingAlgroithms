@@ -1,8 +1,6 @@
-import os
 import pandas as pd
-from typing import Set, Union, Tuple, Optional
+from typing import Set, Union, Optional
 
-from Config import experiment_config as cnfg
 from DataParsers.BaseEyeTrackerParser import BaseEyeTrackerParser
 
 
@@ -12,15 +10,6 @@ class TobiiEyeTrackerCSVParser(BaseEyeTrackerParser):
     See information on the raw data format under "Tutorial 2 // Task 7" (page 56) in E-Prime's user manual for the Tobii
     eye-tracker (TET) package: https://pstnet.com/wp-content/uploads/2019/05/EET_User_Guide_3.2.pdf
     """
-
-    def parse(self, input_path: str,
-              screen_resolution: Tuple[float, float] = cnfg.SCREEN_MONITOR.resolution) -> pd.DataFrame:
-        df = self._read_raw_data(input_path)
-        df = self._keep_relevant_data(df)
-        df = self._correct_gaze_for_screen_resolution(df, screen_resolution)
-        df = self._perform_additional_parsing(df)
-        df = self._reorder_and_rename_columns(df)
-        return df
 
     @classmethod
     def _read_raw_data(cls, input_path: str) -> pd.DataFrame:
