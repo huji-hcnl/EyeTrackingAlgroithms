@@ -30,9 +30,11 @@ class BaseEyeTrackerParser(ABC):
 
     @classmethod
     def _get_common_columns(cls):
-        return [cls.TRIAL_COLUMN(), cls.MILLISECONDS_COLUMN(), cls.MICROSECONDS_COLUMN(),
-                cls.LEFT_X_COLUMN(), cls.LEFT_Y_COLUMN(), cls.LEFT_PUPIL_COLUMN(),
-                cls.RIGHT_X_COLUMN(), cls.RIGHT_Y_COLUMN(), cls.RIGHT_PUPIL_COLUMN()]
+        columns = [cls.TRIAL_COLUMN(),
+                   cls.SECONDS_COLUMN(), cls.MILLISECONDS_COLUMN(), cls.MICROSECONDS_COLUMN(),
+                   cls.LEFT_X_COLUMN(), cls.LEFT_Y_COLUMN(), cls.LEFT_PUPIL_COLUMN(),
+                   cls.RIGHT_X_COLUMN(), cls.RIGHT_Y_COLUMN(), cls.RIGHT_PUPIL_COLUMN()]
+        return list(filter(lambda col: cls.__is_valid_column_name(col), columns))
 
     @classmethod
     @abstractmethod
@@ -44,6 +46,12 @@ class BaseEyeTrackerParser(ABC):
     @abstractmethod
     def TRIAL_COLUMN(cls) -> str:
         # column name for trial number
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def SECONDS_COLUMN(cls) -> str:
+        # column name for time in seconds
         raise NotImplementedError
 
     @classmethod
@@ -121,3 +129,14 @@ class BaseEyeTrackerParser(ABC):
         if column_name == cls.RIGHT_PUPIL_COLUMN():
             return cnst.RIGHT_PUPIL
         return column_name
+
+    @classmethod
+    def __is_valid_column_name(cls, column_name: Optional[str]) -> bool:
+        # checks if a column name is valid string
+        if column_name is None:
+            return False
+        if not isinstance(column_name, str):
+            return False
+        if len(column_name) == 0:
+            return False
+        return True
