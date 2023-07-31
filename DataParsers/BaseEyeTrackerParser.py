@@ -29,7 +29,7 @@ class BaseEyeTrackerParser(ABC):
         return [df[df[cnst.TRIAL] == trial_idx] for trial_idx in trial_indices]
 
     @classmethod
-    def get_common_columns(cls):
+    def _get_common_columns(cls):
         return [cls.TRIAL_COLUMN(), cls.MILLISECONDS_COLUMN(), cls.MICROSECONDS_COLUMN(),
                 cls.LEFT_X_COLUMN(), cls.LEFT_Y_COLUMN(), cls.LEFT_PUPIL_COLUMN(),
                 cls.RIGHT_X_COLUMN(), cls.RIGHT_Y_COLUMN(), cls.RIGHT_PUPIL_COLUMN()]
