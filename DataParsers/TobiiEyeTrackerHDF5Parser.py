@@ -17,7 +17,7 @@ class TobiiEyeTrackerHDF5Parser(BaseEyeTrackerParser):
     def _read_raw_data(cls, input_path: str):
         """
         Reads the raw HDF5 file exported by Tobii eye-tracker and returns a pandas DataFrame.
-        See aditional resources:
+        See additional resources:
         - file structure (hdf5): https://psychopy.org/hardware/eyeTracking.html#what-about-the-data
         - data format: https://psychopy.org/api/iohub/device/eyetracker_interface/Tobii_Implementation_Notes.html
         - PsychoPy's IOHub code:
