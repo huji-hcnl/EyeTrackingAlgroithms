@@ -72,6 +72,17 @@ class BaseEyeTrackerParser(ABC):
         raise NotImplementedError
 
     @final
+    def _reorder_and_rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Reorders the columns of the DataFrame to the order specified by `columns` and renames the columns to match the
+        standard naming scheme (except for the additional columns, which are not renamed).
+        """
+        new_df = df.copy()
+        new_df = new_df[self.columns]
+        df.rename(columns=lambda col: self._column_name_mapper(col), inplace=True)
+        return new_df
+
+    @final
     @property
     def columns(self) -> List[str]:
         return self._get_common_columns() + self._additional_columns
