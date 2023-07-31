@@ -65,6 +65,12 @@ class BaseEyeTrackerParser(ABC):
         new_df[cls.RIGHT_Y_COLUMN()] = df[cls.RIGHT_Y_COLUMN()] * screen_h
         return new_df
 
+    @classmethod
+    @abstractmethod
+    def _perform_additional_parsing(cls, df: pd.DataFrame) -> pd.DataFrame:
+        # This method can be overridden by subclasses to perform additional parsing steps.
+        raise NotImplementedError
+
     @final
     @property
     def columns(self) -> List[str]:

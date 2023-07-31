@@ -18,10 +18,7 @@ class TobiiEyeTrackerCSVParser(BaseEyeTrackerParser):
         df = self._read_raw_data(input_path)
         df = self._keep_relevant_data(df)
         df = self._correct_gaze_for_screen_resolution(df, screen_resolution)
-
-        # convert pupil size to float
-        df[self.LEFT_PUPIL_COLUMN()] = df[self.LEFT_PUPIL_COLUMN()].astype(float)
-        df[self.RIGHT_PUPIL_COLUMN()] = df[self.RIGHT_PUPIL_COLUMN()].astype(float)
+        df = self._perform_additional_parsing(df)
 
         # reorder + rename columns to match the standard (except for the additional columns)
         df = df[self.columns]
@@ -44,6 +41,15 @@ class TobiiEyeTrackerCSVParser(BaseEyeTrackerParser):
         cls._raise_for_invalid_input_path(input_path)
         df = pd.read_csv(input_path, sep='\t', low_memory=False)
         return df
+
+    @classmethod
+    def _perform_additional_parsing(cls, df: pd.DataFrame) -> pd.DataFrame:
+        new_df = df.copy()
+
+        # convert pupil size to float
+        new_df[cls.LEFT_PUPIL_COLUMN()] = new_df[cls.LEFT_PUPIL_COLUMN()].astype(float)
+        new_df[cls.RIGHT_PUPIL_COLUMN()] = new_df[cls.RIGHT_PUPIL_COLUMN()].astype(float)
+        return new_df
 
     @classmethod
     def FILE_EXTENSION(cls) -> str:
