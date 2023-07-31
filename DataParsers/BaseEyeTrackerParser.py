@@ -26,6 +26,16 @@ class BaseEyeTrackerParser(ABC):
     @final
     def parse(self, input_path: str,
               screen_resolution: Tuple[float, float] = cnfg.SCREEN_MONITOR.resolution) -> pd.DataFrame:
+        """
+        Reads and parses the raw data from the input file, following these steps:
+        1. Reads the raw data from the input file (implemented separately for each parser)
+        2. Removes all columns that are not relevant for the analysis
+        3. Corrects the gaze coordinates for the screen resolution
+        4. Performs additional parsing (implemented separately for each parser)
+        5. Reorders and renames the columns to match the common format
+
+        Returns a single Dataframe containing the parsed data.
+        """
         df = self._read_raw_data(input_path)
         df = self._keep_relevant_data(df)
         df = self._correct_gaze_for_screen_resolution(df, screen_resolution)
