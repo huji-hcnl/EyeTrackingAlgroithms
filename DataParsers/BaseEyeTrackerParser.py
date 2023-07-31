@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 from abc import ABC, abstractmethod
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Set
 
 import constants as cnst
 
@@ -41,7 +41,7 @@ class BaseEyeTrackerParser(ABC):
 
     @classmethod
     @abstractmethod
-    def MISSING_VALUES(cls) -> List[Union[float, str]]:
+    def MISSING_VALUES(cls) -> Set[Union[int, float, str, None]]:
         # values of missing data in the raw data file
         raise NotImplementedError
 
