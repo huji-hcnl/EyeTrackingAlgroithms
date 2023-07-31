@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from typing import List, Union, Tuple
+from typing import Set, Union, Tuple
 
 from Config import experiment_config as cnfg
 from DataParsers.BaseEyeTrackerParser import BaseEyeTrackerParser
@@ -40,8 +40,8 @@ class TobiiEyeTrackerCSVParser(BaseEyeTrackerParser):
         return df
 
     @classmethod
-    def MISSING_VALUES(cls) -> List[Union[int, float, str]]:
-        return [-1, "-1", "-1.#IND0"]
+    def MISSING_VALUES(cls) -> Set[Union[int, float, str, None]]:
+        return {-1, "-1", "-1.#IND0"}
 
     @classmethod
     def TRIAL_COLUMN(cls) -> str:
