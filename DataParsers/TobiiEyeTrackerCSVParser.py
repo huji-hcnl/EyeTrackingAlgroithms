@@ -16,9 +16,7 @@ class TobiiEyeTrackerCSVParser(BaseEyeTrackerParser):
     def parse(self, input_path: str,
               screen_resolution: Tuple[float, float] = cnfg.SCREEN_MONITOR.resolution) -> pd.DataFrame:
         df = self._read_raw_data(input_path)
-        columns_to_keep = self._get_common_columns() + self._additional_columns
-        df.drop(columns=[col for col in df.columns if col not in columns_to_keep], inplace=True)
-        df.replace(dict.fromkeys(self.MISSING_VALUES(), self._DEFAULT_MISSING_VALUE), inplace=True)
+        df = self._keep_relevant_data(df)
 
         # correct for screen resolution
         # note that coordinates may fall outside the screen, we don't clip them (see https://shorturl.at/hvBCY)
@@ -33,7 +31,7 @@ class TobiiEyeTrackerCSVParser(BaseEyeTrackerParser):
         df[self.RIGHT_PUPIL_COLUMN()] = df[self.RIGHT_PUPIL_COLUMN()].astype(float)
 
         # reorder + rename columns to match the standard (except for the additional columns)
-        df = df[columns_to_keep]
+        df = df[self.columns]
         df.rename(columns=lambda col: self._column_name_mapper(col), inplace=True)
         return df
 
