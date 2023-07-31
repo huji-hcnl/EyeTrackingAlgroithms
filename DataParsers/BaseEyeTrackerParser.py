@@ -17,7 +17,10 @@ class BaseEyeTrackerParser(ABC):
     _DEFAULT_MISSING_VALUE = np.nan
 
     def __init__(self, additional_columns: Optional[List[str]] = None):
-        self._additional_columns: List[str] = additional_columns if additional_columns is not None else []
+        if additional_columns is None:
+            additional_columns = []
+        self._additional_columns: List[str] = list(filter(lambda col: self.__is_valid_column_name(col),
+                                                          additional_columns))
 
     @abstractmethod
     def parse(self, input_path: str, *args) -> pd.DataFrame:
