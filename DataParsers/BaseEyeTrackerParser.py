@@ -106,11 +106,6 @@ class BaseEyeTrackerParser(ABC):
         raise NotImplementedError
 
     @classmethod
-    def ADDITIONAL_COLUMNS(cls) -> List[str]:
-        # column names for additional data
-        return []
-
-    @classmethod
     def _column_name_mapper(cls, column_name: str) -> str:
         # maps column names to constants
         if column_name == cls.TRIAL_COLUMN():
