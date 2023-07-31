@@ -47,66 +47,66 @@ class BaseEyeTrackerParser(ABC):
 
     @classmethod
     @abstractmethod
-    def TRIAL_COLUMN(cls) -> str:
+    def TRIAL_COLUMN(cls) -> Optional[str]:
         # column name for trial number
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def SECONDS_COLUMN(cls) -> str:
+    def SECONDS_COLUMN(cls) -> Optional[str]:
         # column name for time in seconds
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def MILLISECONDS_COLUMN(cls) -> str:
+    def MILLISECONDS_COLUMN(cls) -> Optional[str]:
         # column name for time in milliseconds
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def MICROSECONDS_COLUMN(cls) -> str:
+    def MICROSECONDS_COLUMN(cls) -> Optional[str]:
         # column name for time in microseconds
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def LEFT_X_COLUMN(cls) -> str:
+    def LEFT_X_COLUMN(cls) -> Optional[str]:
         # column name for left eye x coordinate
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def LEFT_Y_COLUMN(cls) -> str:
+    def LEFT_Y_COLUMN(cls) -> Optional[str]:
         # column name for left eye y coordinate
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def LEFT_PUPIL_COLUMN(cls) -> str:
+    def LEFT_PUPIL_COLUMN(cls) -> Optional[str]:
         # column name for left eye pupil diameter
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def RIGHT_X_COLUMN(cls) -> str:
+    def RIGHT_X_COLUMN(cls) -> Optional[str]:
         # column name for right eye x coordinate
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def RIGHT_Y_COLUMN(cls) -> str:
+    def RIGHT_Y_COLUMN(cls) -> Optional[str]:
         # column name for right eye y coordinate
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def RIGHT_PUPIL_COLUMN(cls) -> str:
+    def RIGHT_PUPIL_COLUMN(cls) -> Optional[str]:
         # column name for right eye pupil diameter
         raise NotImplementedError
 
     @classmethod
-    def _column_name_mapper(cls, column_name: str) -> str:
+    def _column_name_mapper(cls, column_name: str) -> Optional[str]:
         # maps column names to constants
         if column_name == cls.TRIAL_COLUMN():
             return cnst.TRIAL
