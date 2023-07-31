@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from typing import Set, Union, Tuple
+from typing import Set, Union, Tuple, Optional
 
 from Config import experiment_config as cnfg
 from DataParsers.BaseEyeTrackerParser import BaseEyeTrackerParser
@@ -44,37 +44,37 @@ class TobiiEyeTrackerCSVParser(BaseEyeTrackerParser):
         return {-1, "-1", "-1.#IND0"}
 
     @classmethod
-    def TRIAL_COLUMN(cls) -> str:
+    def TRIAL_COLUMN(cls) -> Optional[str]:
         return 'RunningSample'
 
     @classmethod
-    def MILLISECONDS_COLUMN(cls) -> str:
+    def MILLISECONDS_COLUMN(cls) -> Optional[str]:
         return 'RTTime'
 
     @classmethod
-    def MICROSECONDS_COLUMN(cls) -> str:
+    def MICROSECONDS_COLUMN(cls) -> Optional[str]:
         return 'RTTimeMicro'
 
     @classmethod
-    def LEFT_X_COLUMN(cls) -> str:
+    def LEFT_X_COLUMN(cls) -> Optional[str]:
         return 'GazePointPositionDisplayXLeftEye'
 
     @classmethod
-    def LEFT_Y_COLUMN(cls) -> str:
+    def LEFT_Y_COLUMN(cls) -> Optional[str]:
         return 'GazePointPositionDisplayYLeftEye'
 
     @classmethod
-    def LEFT_PUPIL_COLUMN(cls) -> str:
+    def LEFT_PUPIL_COLUMN(cls) -> Optional[str]:
         return "PupilDiameterLeftEye"
 
     @classmethod
-    def RIGHT_X_COLUMN(cls) -> str:
+    def RIGHT_X_COLUMN(cls) -> Optional[str]:
         return 'GazePointPositionDisplayXRightEye'
 
     @classmethod
-    def RIGHT_Y_COLUMN(cls) -> str:
+    def RIGHT_Y_COLUMN(cls) -> Optional[str]:
         return 'GazePointPositionDisplayYRightEye'
 
     @classmethod
-    def RIGHT_PUPIL_COLUMN(cls) -> str:
+    def RIGHT_PUPIL_COLUMN(cls) -> Optional[str]:
         return "PupilDiameterRightEye"
