@@ -17,14 +17,7 @@ class TobiiEyeTrackerCSVParser(BaseEyeTrackerParser):
               screen_resolution: Tuple[float, float] = cnfg.SCREEN_MONITOR.resolution) -> pd.DataFrame:
         df = self._read_raw_data(input_path)
         df = self._keep_relevant_data(df)
-
-        # correct for screen resolution
-        # note that coordinates may fall outside the screen, we don't clip them (see https://shorturl.at/hvBCY)
-        screen_w, screen_h = max(screen_resolution), min(screen_resolution)
-        df[self.LEFT_X_COLUMN()] = df[self.LEFT_X_COLUMN()] * screen_w
-        df[self.LEFT_Y_COLUMN()] = df[self.LEFT_Y_COLUMN()] * screen_h
-        df[self.RIGHT_X_COLUMN()] = df[self.RIGHT_X_COLUMN()] * screen_w
-        df[self.RIGHT_Y_COLUMN()] = df[self.RIGHT_Y_COLUMN()] * screen_h
+        df = self._correct_gaze_for_screen_resolution(df, screen_resolution)
 
         # convert pupil size to float
         df[self.LEFT_PUPIL_COLUMN()] = df[self.LEFT_PUPIL_COLUMN()].astype(float)

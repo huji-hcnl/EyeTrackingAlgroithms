@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 from abc import ABC, abstractmethod
-from typing import List, Optional, Union, Set, final
+from typing import List, Optional, Union, Set, Tuple, final
 
 import constants as cnst
 
@@ -45,6 +45,24 @@ class BaseEyeTrackerParser(ABC):
         """
         new_df = df.drop(columns=[col for col in df.columns if col not in self.columns])
         new_df.replace(dict.fromkeys(self.MISSING_VALUES(), self._DEFAULT_MISSING_VALUE), inplace=True)
+        return new_df
+
+    @classmethod
+    @final
+    def _correct_gaze_for_screen_resolution(cls, df: pd.DataFrame,
+                                            screen_resolution: Tuple[float, float]) -> pd.DataFrame:
+        """
+        Gaze data is measured in relative-coordinates, i.e. they are normalized to screen-resolution such that the
+        top-left corner is (0, 0) and the bottom-right corner is (1, 1). This converts the relative-coordinates to
+        absolute-coordinates, i.e. the top left corner is (0, 0) and the bottom right corner is (screen_width, screen_height).
+        Note that coordinates may fall outside the screen, we don't clip them, see: https://developer.tobiipro.com/commonconcepts/coordinatesystems.html
+        """
+        new_df = df.copy()
+        screen_w, screen_h = max(screen_resolution), min(screen_resolution)
+        new_df[cls.LEFT_X_COLUMN()] = df[cls.LEFT_X_COLUMN()] * screen_w
+        new_df[cls.LEFT_Y_COLUMN()] = df[cls.LEFT_Y_COLUMN()] * screen_h
+        new_df[cls.RIGHT_X_COLUMN()] = df[cls.RIGHT_X_COLUMN()] * screen_w
+        new_df[cls.RIGHT_Y_COLUMN()] = df[cls.RIGHT_Y_COLUMN()] * screen_h
         return new_df
 
     @final
