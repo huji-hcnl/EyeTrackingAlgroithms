@@ -14,6 +14,15 @@ class TobiiEyeTrackerHDF5Parser(BaseEyeTrackerParser):
 
     @staticmethod
     def tobii_hdf5_to_dataframe(input_path: str):
+        """
+        Reads the raw HDF5 file exported by Tobii eye-tracker and returns a pandas DataFrame.
+        See information about the file structure and data format here:
+        https://psychopy.org/hardware/eyeTracking.html#what-about-the-data
+
+        :param input_path: path to the HDF5 file
+        :return: pandas DataFrame
+        :raises FileNotFoundError: if the file does not exist
+        """
         if not os.path.exists(input_path):
             raise FileNotFoundError(f'File not found: {input_path}')
         with h5.File(input_path, 'r') as f:
