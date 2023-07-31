@@ -48,6 +48,10 @@ class TobiiEyeTrackerCSVParser(BaseEyeTrackerParser):
         return 'RunningSample'
 
     @classmethod
+    def SECONDS_COLUMN(cls) -> Optional[str]:
+        return None
+
+    @classmethod
     def MILLISECONDS_COLUMN(cls) -> Optional[str]:
         return 'RTTime'
 
