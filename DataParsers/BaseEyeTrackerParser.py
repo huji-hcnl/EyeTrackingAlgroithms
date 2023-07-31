@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 from abc import ABC, abstractmethod
-from typing import List, Optional, Union, Set
+from typing import List, Optional, Union, Set, final
 
 import constants as cnst
 
@@ -26,7 +26,8 @@ class BaseEyeTrackerParser(ABC):
     def parse(self, input_path: str, *args) -> pd.DataFrame:
         raise NotImplementedError
 
-    def parse_and_split(self, input_path: str) -> List[pd.DataFrame]:
+    @final
+    def parse_and_split_by_trial(self, input_path: str) -> List[pd.DataFrame]:
         df = self.parse(input_path)
         trial_indices = df[cnst.TRIAL].unique()
         return [df[df[cnst.TRIAL] == trial_idx] for trial_idx in trial_indices]
