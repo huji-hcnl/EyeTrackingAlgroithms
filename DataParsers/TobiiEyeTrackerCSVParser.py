@@ -15,9 +15,7 @@ class TobiiEyeTrackerCSVParser(BaseEyeTrackerParser):
 
     def parse(self, input_path: str,
               screen_resolution: Tuple[float, float] = cnfg.SCREEN_MONITOR.resolution) -> pd.DataFrame:
-        if not os.path.exists(input_path):
-            raise FileNotFoundError(f'File not found: {input_path}')
-        df = pd.read_csv(input_path, sep='\t', low_memory=False)
+        df = self._read_raw_data(input_path)
         columns_to_keep = self._get_common_columns() + self._additional_columns
         df.drop(columns=[col for col in df.columns if col not in columns_to_keep], inplace=True)
         df.replace(dict.fromkeys(self.MISSING_VALUES(), self._DEFAULT_MISSING_VALUE), inplace=True)
@@ -38,6 +36,28 @@ class TobiiEyeTrackerCSVParser(BaseEyeTrackerParser):
         df = df[columns_to_keep]
         df.rename(columns=lambda col: self._column_name_mapper(col), inplace=True)
         return df
+
+    @classmethod
+    def _read_raw_data(cls, input_path: str) -> pd.DataFrame:
+        """
+        Reads the raw data from the input CSV file.
+        See information on the raw data format under "Tutorial 2 // Task 7" (page 56) in E-Prime's user manual for the
+        Tobii eye-tracker (TET) package: https://pstnet.com/wp-content/uploads/2019/05/EET_User_Guide_3.2.pdf
+
+        :param input_path: path to the input CSV file
+        :return: a DataFrame containing the raw data
+
+        :raises FileNotFoundError: if the input file does not exist
+        :raise ValueError: if the input file is not a csv file
+        """
+        cls._raise_for_invalid_input_path(input_path)
+        df = pd.read_csv(input_path, sep='\t', low_memory=False)
+        return df
+
+    @classmethod
+    def FILE_EXTENSION(cls) -> str:
+        # file extension of raw data files
+        return '.csv'
 
     @classmethod
     def MISSING_VALUES(cls) -> Set[Union[int, float, str, None]]:
