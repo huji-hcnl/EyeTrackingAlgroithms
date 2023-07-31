@@ -16,8 +16,8 @@ class TobiiEyeTrackerHDF5Parser(BaseEyeTrackerParser):
     def parse(self, input_path: str, *args) -> pd.DataFrame:
         raise NotImplementedError
 
-    @staticmethod
-    def tobii_hdf5_to_dataframe(input_path: str):
+    @classmethod
+    def _read_raw_data(cls, input_path: str):
         """
         Reads the raw HDF5 file exported by Tobii eye-tracker and returns a pandas DataFrame.
         See aditional resources:
@@ -29,11 +29,12 @@ class TobiiEyeTrackerHDF5Parser(BaseEyeTrackerParser):
             * eye tracker binocular event: https://github.com/psychopy/versions/blob/master/psychopy/iohub/devices/eyetracker/eye_events.py#L330
 
         :param input_path: path to the HDF5 file
-        :return: pandas DataFrame
+        :return: a DataFrame containing the raw data
+
         :raises FileNotFoundError: if the file does not exist
+
         """
-        if not os.path.exists(input_path):
-            raise FileNotFoundError(f'File not found: {input_path}')
+        cls._raise_for_invalid_input_path(input_path)
         with h5.File(input_path, 'r') as f:
             dataset = f['data_collection']['events']['eyetracker']['BinocularEyeSampleEvent']
             colnames = dataset.dtype.names
@@ -42,6 +43,11 @@ class TobiiEyeTrackerHDF5Parser(BaseEyeTrackerParser):
                 for i, col in enumerate(colnames):
                     data_dict[col].append(row[i])
         return pd.DataFrame(data_dict)
+
+    @classmethod
+    def FILE_EXTENSION(cls) -> str:
+        # file extension of raw data files
+        return '.hdf5'
 
     @classmethod
     def MISSING_VALUES(cls) -> Set[Union[int, float, str]]:

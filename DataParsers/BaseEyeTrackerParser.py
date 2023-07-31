@@ -33,12 +33,23 @@ class BaseEyeTrackerParser(ABC):
         return [df[df[cnst.TRIAL] == trial_idx] for trial_idx in trial_indices]
 
     @classmethod
+    @abstractmethod
+    def _read_raw_data(cls, input_path: str) -> pd.DataFrame:
+        raise NotImplementedError
+
+    @classmethod
     def _get_common_columns(cls):
         columns = [cls.TRIAL_COLUMN(),
                    cls.SECONDS_COLUMN(), cls.MILLISECONDS_COLUMN(), cls.MICROSECONDS_COLUMN(),
                    cls.LEFT_X_COLUMN(), cls.LEFT_Y_COLUMN(), cls.LEFT_PUPIL_COLUMN(),
                    cls.RIGHT_X_COLUMN(), cls.RIGHT_Y_COLUMN(), cls.RIGHT_PUPIL_COLUMN()]
         return list(filter(lambda col: cls.__is_valid_column_name(col), columns))
+
+    @classmethod
+    @abstractmethod
+    def FILE_EXTENSION(cls) -> str:
+        # file extension of raw data files
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
@@ -128,6 +139,15 @@ class BaseEyeTrackerParser(ABC):
         if column_name == cls.RIGHT_PUPIL_COLUMN():
             return cnst.RIGHT_PUPIL
         return column_name
+
+    @classmethod
+    def _raise_for_invalid_input_path(cls, input_path: str):
+        if not os.path.exists(input_path):
+            raise FileNotFoundError(f"Input file '{input_path}' does not exist.")
+        if not os.path.isfile(input_path):
+            raise FileNotFoundError(f"Input file '{input_path}' is not a file.")
+        if not input_path.endswith(cls.FILE_EXTENSION()):
+            raise ValueError(f"Input file '{input_path}' is not a '{cls.FILE_EXTENSION()}' file.")
 
     @classmethod
     def __is_valid_column_name(cls, column_name: Optional[str]) -> bool:
