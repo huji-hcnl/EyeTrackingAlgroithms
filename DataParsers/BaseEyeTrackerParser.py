@@ -34,10 +34,25 @@ class BaseEyeTrackerParser(ABC):
         return df
 
     @final
-    def parse_and_split_by_trial(self, input_path: str) -> List[pd.DataFrame]:
+    def parse_and_split_by_column(self, input_path: str, column_name: str) -> List[pd.DataFrame]:
+        """
+        Reads and parses the raw data from the input file, and splits the data into multiple DataFrames based on the
+        unique values of the given column.
+
+        :param input_path: path to the input file
+        :param column_name: name of the column to split by
+        :return: a list of DataFrames, each containing the data for a single value of the given column
+
+        :raises ValueError: if the given column name is invalid
+        :raises AttributeError: if the given column name is unfamiliar to the parser
+        """
+        if self.__is_valid_column_name(column_name):
+            raise ValueError(f'Invalid column name: {column_name}')
+        if column_name not in self.columns:
+            raise AttributeError(f'{self.__class__.__name__} does not contain column {column_name}')
         df = self.parse(input_path)
-        trial_indices = df[cnst.TRIAL].unique()
-        return [df[df[cnst.TRIAL] == trial_idx] for trial_idx in trial_indices]
+        column_values = df[column_name].unique()
+        return [df[df[column_name] == column_value] for column_value in column_values]
 
     @classmethod
     @abstractmethod
