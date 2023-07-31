@@ -19,10 +19,7 @@ class TobiiEyeTrackerCSVParser(BaseEyeTrackerParser):
         df = self._keep_relevant_data(df)
         df = self._correct_gaze_for_screen_resolution(df, screen_resolution)
         df = self._perform_additional_parsing(df)
-
-        # reorder + rename columns to match the standard (except for the additional columns)
-        df = df[self.columns]
-        df.rename(columns=lambda col: self._column_name_mapper(col), inplace=True)
+        df = self._reorder_and_rename_columns(df)
         return df
 
     @classmethod
