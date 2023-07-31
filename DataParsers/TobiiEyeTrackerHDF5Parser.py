@@ -103,11 +103,3 @@ class TobiiEyeTrackerHDF5Parser(BaseEyeTrackerParser):
     def RIGHT_PUPIL_COLUMN(cls) -> Optional[str]:
         # column name for right eye pupil diameter
         return "right_pupil_measure_1"
-
-    raise NotImplementedError
-
-
-
-
-
-
