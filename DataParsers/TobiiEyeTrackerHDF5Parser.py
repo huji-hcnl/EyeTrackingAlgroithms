@@ -1,7 +1,7 @@
 import h5py as h5
 import numpy as np
 import pandas as pd
-from typing import Set, Union, Optional
+from typing import Set, Union, Optional, List
 
 from DataParsers.BaseEyeTrackerParser import BaseEyeTrackerParser
 
@@ -48,6 +48,11 @@ class TobiiEyeTrackerHDF5Parser(BaseEyeTrackerParser):
     def _perform_additional_parsing(cls, df: pd.DataFrame) -> pd.DataFrame:
         # TODO: extract trial data from messages
         return df  # no additional parsing needed
+
+    @classmethod
+    def _post_parsing_processing(cls, df: pd.DataFrame) -> pd.DataFrame:
+        # TODO: remove columns that were used to extract trial data
+        return df
 
     @classmethod
     def FILE_EXTENSION(cls) -> str:
@@ -107,6 +112,12 @@ class TobiiEyeTrackerHDF5Parser(BaseEyeTrackerParser):
     def RIGHT_PUPIL_COLUMN(cls) -> Optional[str]:
         # column name for right eye pupil diameter
         return "right_pupil_measure_1"
+
+    @classmethod
+    def ADDITIONAL_COLUMNS(cls) -> List[str]:
+        # columns required for trial extraction
+        # TODO: add columns that are required for trial extraction
+        return []
 
     @staticmethod
     def __hdf5_dataset_to_pandas_dataframe(dataset: h5.Dataset) -> pd.DataFrame:
