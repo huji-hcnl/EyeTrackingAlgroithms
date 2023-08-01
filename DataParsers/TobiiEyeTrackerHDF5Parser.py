@@ -34,7 +34,15 @@ class TobiiEyeTrackerHDF5Parser(BaseEyeTrackerParser):
         with h5.File(input_path, 'r') as f:
             binocular_dataset = f['data_collection']['events']['eyetracker']['BinocularEyeSampleEvent']
             binocular_df = cls.__hdf5_dataset_to_pandas_dataframe(binocular_dataset)
-        return binocular_df
+            messages_ds = f['data_collection']['events']['experiment']['MessageEvent']
+            messages_df = cls.__hdf5_dataset_to_pandas_dataframe(messages_ds)
+
+        # merge the two dataframes
+        join_columns = ['experiment_id', 'session_id', 'device_id', 'event_id',
+                          'type', 'device_time', 'logged_time', 'time']  # columns that are common to both dataframes
+        merged_df = pd.merge(left=binocular_df, right=messages_df, on=join_columns, how='outer')
+        merged_df = merged_df.sort_values(by='time').reset_index(drop=True)
+        return merged_df
 
     @classmethod
     def _perform_additional_parsing(cls, df: pd.DataFrame) -> pd.DataFrame:
