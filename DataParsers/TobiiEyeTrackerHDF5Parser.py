@@ -39,6 +39,7 @@ class TobiiEyeTrackerHDF5Parser(BaseEyeTrackerParser):
 
     @classmethod
     def _perform_additional_parsing(cls, df: pd.DataFrame) -> pd.DataFrame:
+        # TODO: extract trial data from messages
         return df  # no additional parsing needed
 
     @classmethod
