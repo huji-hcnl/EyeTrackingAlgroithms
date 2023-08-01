@@ -101,10 +101,9 @@ class BaseEyeTrackerParser(ABC):
         return new_df
 
     @classmethod
-    @abstractmethod
     def _perform_additional_parsing(cls, df: pd.DataFrame) -> pd.DataFrame:
         # This method can be overridden by subclasses to perform additional parsing steps.
-        raise NotImplementedError
+        return df
 
     @final
     def _reorder_and_rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
