@@ -118,7 +118,7 @@ class BaseEyeTrackerParser(ABC):
     @final
     @property
     def columns(self) -> List[str]:
-        return self._get_common_columns() + self._experiment_specific_columns
+        return self._get_common_columns() + self.ADDITIONAL_COLUMNS() + self._experiment_specific_columns
 
     @classmethod
     @abstractmethod
@@ -191,6 +191,11 @@ class BaseEyeTrackerParser(ABC):
     def RIGHT_PUPIL_COLUMN(cls) -> Optional[str]:
         # column name for right eye pupil diameter
         raise NotImplementedError
+
+    @classmethod
+    def ADDITIONAL_COLUMNS(cls) -> List[str]:
+        # additional columns that are specific for each parser
+        return []
 
     @classmethod
     @final
