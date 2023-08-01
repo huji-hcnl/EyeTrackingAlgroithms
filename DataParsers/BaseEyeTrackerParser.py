@@ -118,6 +118,7 @@ class BaseEyeTrackerParser(ABC):
     @final
     @property
     def columns(self) -> List[str]:
+        """ Returns a list of all columns that are required for parsing the raw data """
         return self._get_common_columns() + self.ADDITIONAL_COLUMNS() + self._experiment_specific_columns
 
     @classmethod
