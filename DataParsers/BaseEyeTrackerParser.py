@@ -34,14 +34,16 @@ class BaseEyeTrackerParser(ABC):
         3. Corrects the gaze coordinates for the screen resolution
         4. Performs additional parsing (implemented separately for each parser)
         5. Reorders and renames the columns to match the common format
+        6. Performs additional processing (implemented separately for each parser)
 
         Returns a single Dataframe containing the parsed data.
         """
-        df = self._read_raw_data(input_path)
+        df = self._read_raw_data(input_path)        # per-parser implementation
         df = self._keep_relevant_data(df)
         df = self._correct_gaze_for_screen_resolution(df, screen_resolution)
-        df = self._perform_additional_parsing(df)
+        df = self._perform_additional_parsing(df)   # per-parser implementation
         df = self._reorder_and_rename_columns(df)
+        df = self._post_parsing_processing(df)      # per-parser implementation
         return df
 
     @final
@@ -114,6 +116,11 @@ class BaseEyeTrackerParser(ABC):
         new_df = new_df[self.columns]
         df.rename(columns=lambda col: self._column_name_mapper(col), inplace=True)
         return new_df
+
+    @classmethod
+    def _post_parsing_processing(cls, df: pd.DataFrame) -> pd.DataFrame:
+        # This method can be overridden by subclasses to perform additional post-parsing processing steps.
+        return df
 
     @final
     @property
