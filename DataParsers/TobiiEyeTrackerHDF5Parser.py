@@ -33,13 +33,9 @@ class TobiiEyeTrackerHDF5Parser(BaseEyeTrackerParser):
         """
         cls._raise_for_invalid_input_path(input_path)
         with h5.File(input_path, 'r') as f:
-            dataset = f['data_collection']['events']['eyetracker']['BinocularEyeSampleEvent']
-            colnames = dataset.dtype.names
-            data_dict = {col: [] for col in colnames}
-            for row in dataset:
-                for i, col in enumerate(colnames):
-                    data_dict[col].append(row[i])
-        return pd.DataFrame(data_dict)
+            binocular_dataset = f['data_collection']['events']['eyetracker']['BinocularEyeSampleEvent']
+            binocular_df = cls.__hdf5_dataset_to_pandas_dataframe(binocular_dataset)
+        return binocular_df
 
     @classmethod
     def _perform_additional_parsing(cls, df: pd.DataFrame) -> pd.DataFrame:
@@ -103,3 +99,15 @@ class TobiiEyeTrackerHDF5Parser(BaseEyeTrackerParser):
     def RIGHT_PUPIL_COLUMN(cls) -> Optional[str]:
         # column name for right eye pupil diameter
         return "right_pupil_measure_1"
+
+    @staticmethod
+    def __hdf5_dataset_to_pandas_dataframe(dataset: h5.Dataset) -> pd.DataFrame:
+        """
+        Iterates over all rows in the HDF5 dataset and returns a pandas DataFrame.
+        """
+        colnames = dataset.dtype.names
+        data_dict = {col: [] for col in colnames}
+        for row in dataset:
+            for i, col in enumerate(colnames):
+                data_dict[col].append(row[i])
+        return pd.DataFrame(data_dict)
