@@ -13,6 +13,6 @@ RAW_DATA_DIR = os.path.join(BASE_DIR, "RawData")
 OUTPUT_DIR = os.path.join(BASE_DIR, "Results")
 
 # GLOBAL VARIABLES
-SCREEN_MONITOR: ScreenMonitor = ScreenMonitor.from_default()  # global variable: screen monitor object
+SCREEN_MONITOR: ScreenMonitor = ScreenMonitor.from_tobii_default()  # global variable: screen monitor object
 TRIGGERS = ExperimentTriggerEnum  # global variable: triggers enum
 EXPERIMENT_SPECIFIC_VARIABLES = []  # additional variable recorded in the experiment and extracted from the raw data

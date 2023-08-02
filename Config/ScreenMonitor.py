@@ -8,23 +8,21 @@ class ScreenMonitor:
     Default values are taken from the experiment_config.py file.
     """
 
-    __DEFAULT_WIDTH = 53.5                  # width of the screen in cm
-    __DEFAULT_HEIGHT = 31                   # height of the screen in cm
-    __DEFAULT_REFRESH_RATE = 60             # refresh rate of the screen in Hz
-    __DEFAULT_RESOLUTION = (1920, 1080)     # resolution of the screen in pixels
-
     def __init__(self, width: float, height: float, refresh_rate: float, resolution: Tuple[int, int]):
-        self.__width = width
-        self.__height = height
-        self.__refresh_rate = refresh_rate
-        self.__resolution = resolution
+        self.__width = width                    # width of the screen in cm
+        self.__height = height                  # height of the screen in cm
+        self.__refresh_rate = refresh_rate      # refresh rate of the screen in Hz
+        self.__resolution = resolution          # resolution of the screen in pixels
 
     @staticmethod
-    def from_default() -> "ScreenMonitor":
-        return ScreenMonitor(width=ScreenMonitor.__DEFAULT_WIDTH,
-                             height=ScreenMonitor.__DEFAULT_HEIGHT,
-                             refresh_rate=ScreenMonitor.__DEFAULT_REFRESH_RATE,
-                             resolution=ScreenMonitor.__DEFAULT_RESOLUTION)
+    def from_tobii_default() -> "ScreenMonitor":
+        tobii_width, tobii_height = 53.5, 30.0  # cm
+        tobii_refresh_rate = 60  # Hz
+        tobii_resolution = (1920, 1080)  # pixels
+        return ScreenMonitor(width=tobii_width,
+                             height=tobii_height,
+                             refresh_rate=tobii_refresh_rate,
+                             resolution=tobii_resolution)
 
     @property
     def width(self) -> float:
