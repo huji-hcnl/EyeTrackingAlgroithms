@@ -17,8 +17,7 @@ Data:
 LoadAnderssonData.py:
     - Loads the data into a dataframe, either from the data url or from a pickle file
     - The dataframe includes the following information:
-        number of dataset, stimuli, rater's name, viewer's distance in cm, pixel size in cm, 
-        time stamp (difference of 2ms, starting from 0), 
+        number of dataset, stimuli, rater's name, time stamp (difference of 2ms, starting from 0), 
         x coordinate of the right eye, y coordinate, labels (1-6)
     - If the timestamp is not given- completes it
 
