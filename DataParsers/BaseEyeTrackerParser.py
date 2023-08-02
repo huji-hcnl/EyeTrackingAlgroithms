@@ -18,7 +18,7 @@ class BaseEyeTrackerParser(ABC):
     _DEFAULT_MISSING_VALUE = np.nan
 
     @final
-    def __init__(self, experiment_specific_columns: Optional[List[str]] = None):
+    def __init__(self, experiment_specific_columns: Optional[List[str]] = cnfg.EXPERIMENT_SPECIFIC_VARIABLES):
         if experiment_specific_columns is None:
             experiment_specific_columns = []
         self._experiment_specific_columns: List[str] = list(filter(lambda col: self.__is_valid_column_name(col),
