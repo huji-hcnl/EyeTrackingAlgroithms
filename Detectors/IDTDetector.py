@@ -1,9 +1,10 @@
 import numpy as np
 
+
 class IDTDetector:
     # a threshold value that determines the maximum allowable dispersion for a fixation.
-    __DEFAULT_DISPERSION_THRESHOLD = 3.5 #px
-    __DEFAULT_WINDOW_SIZE = 2 #size of the time window to calculate the mean of the positions (dispersion)
+    __DEFAULT_DISPERSION_THRESHOLD = 3.5  # px
+    __DEFAULT_WINDOW_SIZE = 2  # size of the time window to calculate the mean of the positions (dispersion)
 
     def __init__(self,
                  dispersion_threshold: float = __DEFAULT_DISPERSION_THRESHOLD,
@@ -14,13 +15,13 @@ class IDTDetector:
     def detect(self, x_coords, y_coords) -> np.ndarray:
         # For each sample calculate the dispersion.
         # one way to calculate it: D = [max(x) - min(x)] + [max(y) - min(y)]
-        num_samples = len(data)
+        num_samples = len(x_coords)
         labels = np.zeros(num_samples, dtype=int)
 
         for i in range(num_samples):
             if self._window_dim <= i < num_samples - self._window_dim:
-                x_window = x_coords[i - self._window_dim : i + self._window_dim + 1]
-                y_window = y_coords[i - self._window_dim : i + self._window_dim + 1]
+                x_window = x_coords[i - self._window_dim: i + self._window_dim + 1]
+                y_window = y_coords[i - self._window_dim: i + self._window_dim + 1]
                 dispersion = (max(x_window) - min(x_window)) + (max(y_window) - min(y_window))
             else:
                 dispersion = 0
@@ -38,4 +39,3 @@ class IDTDetector:
 #     Ys = data[:, 1]
 #     detector = IDTDetector()
 #     print(detector.detect(Xs, Ys))
-
