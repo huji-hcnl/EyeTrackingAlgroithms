@@ -12,5 +12,5 @@ RAW_DATA_DIR = os.path.join(BASE_DIR, "RawData")
 OUTPUT_DIR = os.path.join(BASE_DIR, "Results")
 
 # GLOBAL VARIABLES
-ADDITIONAL_COLUMNS = []  # additional columns to be added to the gaze data
 SCREEN_MONITOR: ScreenMonitor = ScreenMonitor.from_default()  # global variable: screen monitor object
+EXPERIMENT_SPECIFIC_VARIABLES = []  # additional variable recorded in the experiment and extracted from the raw data
