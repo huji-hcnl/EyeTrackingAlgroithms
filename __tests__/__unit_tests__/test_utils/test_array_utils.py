@@ -30,3 +30,16 @@ class TestIOUtils(unittest.TestCase):
         exp = [np.array([i]) for i in range(10)]
         self.assertTrue(all([np.array_equal(o, e, equal_nan=True) for o, e in zip(obs, exp)]))
 
+    def test_find_sequences_in_sparse_array(self):
+        seq = np.array([1, 2, 3])
+
+        arr = np.array([np.nan, 2, 3, np.nan, 1, 2, np.nan, 3, 2, np.nan, np.nan, 3, 1, np.nan, np.nan, np.nan, 2,
+                        np.nan, 3, 1, 1, np.nan])
+        exp = [(4, 7), (12, 18)]
+        res = arr_utils.find_sequences_in_sparse_array(arr, seq)
+        self.assertEqual(exp, res)
+
+        arr = np.array([3, 2, 1, 2, 1])
+        exp = []
+        res = arr_utils.find_sequences_in_sparse_array(arr, seq)
+        self.assertEqual(exp, res)
