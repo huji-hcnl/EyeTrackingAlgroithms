@@ -15,5 +15,3 @@ def delete_directory(dirpath: str):
     if not os.path.isdir(dirpath):
         raise NotADirectoryError(f"Path is not a directory: {dirpath}")
     shutil.rmtree(dirpath)
-
-
