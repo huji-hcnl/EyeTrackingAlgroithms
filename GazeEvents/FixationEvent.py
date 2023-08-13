@@ -64,6 +64,8 @@ class FixationEvent(BaseGazeEvent):
             - center_of_mass: fixation's center of mass (2D pixel coordinates)
             - standard_deviation: fixation's standard deviation (in pixel units)
             - dispersion: maximum distance between any two points in the fixation (in pixels units)
+            - mean_pupil_size: mean pupil size during the fixation (in mm)
+            - std_pupil_size: standard deviation of the pupil size during the fixation (in mm)
         """
         series = super().to_series()
         series["center_of_mass"] = self.center_of_mass
