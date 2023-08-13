@@ -14,7 +14,7 @@ class IDTDetector:
     def detect(self, x_coords, y_coords) -> np.ndarray:
         # For each sample calculate the dispersion.
         # one way to calculate it: D = [max(x) - min(x)] + [max(y) - min(y)]
-        num_samples = len(data)
+        num_samples = len(x_coords)
         labels = np.zeros(num_samples, dtype=int)
 
         for i in range(num_samples):
