@@ -57,6 +57,27 @@ class FixationEvent(BaseGazeEvent):
         """ returns the pupil size during the fixation (in mm) """
         return self._pupil
 
+    def is_in_rectangle(self, top_left: Tuple[float, float], bottom_right: Tuple[float, float]) -> bool:
+        """
+        Returns True if the fixation's center of mass is inside the rectangle defined by the given top-left and
+        bottom-right coordinates.
+
+        :raises ValueError: if the given coordinates are not finite numbers
+        """
+        if not np.isfinite(top_left[0]) or not np.isfinite(top_left[1]):
+            raise ValueError(f"Top-left coordinates must be finite numbers: {top_left}")
+        if not np.isfinite(bottom_right[0]) or not np.isfinite(bottom_right[1]):
+            raise ValueError(f"Bottom-right coordinates must be finite numbers: {bottom_right}")
+
+        center_x, center_y = self.center_of_mass
+        if np.isnan(center_x) or np.isnan(center_y):
+            return False
+        if center_x < top_left[0] or center_x > bottom_right[0]:
+            return False
+        if center_y < top_left[1] or center_y > bottom_right[1]:
+            return False
+        return True
+
     def to_series(self) -> pd.Series:
         """
         creates a pandas Series with summary of fixation information.
