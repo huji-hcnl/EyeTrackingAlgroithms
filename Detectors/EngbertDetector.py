@@ -49,7 +49,7 @@ class EngbertDetector(BaseDetector):
         candidates_array = np.array(candidates)
         candidates_array[ellipse < 1] = GazeEventTypeEnum.FIXATION
         candidates_array[ellipse >= 1] = GazeEventTypeEnum.SACCADE
-        return candidates_array.tolist()
+        return list(candidates_array)
 
     def _verify_inputs(self, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         x, y = super()._verify_inputs(x, y)
