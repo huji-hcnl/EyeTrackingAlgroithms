@@ -2,21 +2,23 @@ from typing import List
 import numpy as np
 from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
 from Detectors.BaseDetector import BaseDetector
+from Utils import visual_angle_utils
 
 
 class IDTDetector(BaseDetector):
     # a threshold value that determines the maximum allowable dispersion for a fixation.
-    __DEFAULT_DISPERSION_THRESHOLD = 0.5  # convert from visual angle to pixels
+    __DEFAULT_DISPERSION_THRESHOLD_ANGLE = 0.5  # degrees
     __DEFAULT_WINDOW_DURATION = 100  # ms- size of the duration time window = minimum allowed fixation duration
 
-    def __init__(self, sr: float, viewer_distance: float,
-                 dispersion_threshold: float = __DEFAULT_DISPERSION_THRESHOLD,
+    def __init__(self, sr: float, viewer_distance: float, pixel_size: float,
+                 dispersion_threshold: float = __DEFAULT_DISPERSION_THRESHOLD_ANGLE,
                  window_duration: int = __DEFAULT_WINDOW_DURATION):
         super().__init__(sr=sr)
-        self._dispersion_threshold = dispersion_threshold
-        self._window_duration = window_duration
-        self._window_dim = int((sr / 1000) * window_duration)  # Hertz to ms
-        self._viewer_distance = viewer_distance
+        # visual angle to pixels
+        self._dispersion_threshold_pixels = visual_angle_utils.visual_angle_to_pixels(dispersion_threshold,
+                                                                                      viewer_distance, pixel_size)
+        # Hertz to ms
+        self._window_dim = int((sr / 1000) * window_duration)
 
     def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray,
                                         candidates: List[GazeEventTypeEnum]) -> List[GazeEventTypeEnum]:
@@ -36,7 +38,7 @@ class IDTDetector(BaseDetector):
             dispersion = IDTDetector._calculate_dispersion(x, y, window_start_idx, window_end_idx)
             # as long as the dispersion doesn't exceed the threshold- it is a fixation,
             # and expand the window to the right
-            if dispersion < self._dispersion_threshold:
+            if dispersion < self._dispersion_threshold_pixels:
                 fixation_flag = True
                 window_end_idx += 1
             # when exceeding the dispersion threshold in a fixation window: label all samples in the window as fixation
