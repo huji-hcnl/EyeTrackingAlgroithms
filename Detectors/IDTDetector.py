@@ -73,11 +73,3 @@ class IDTDetector(BaseDetector):
         dispersion = ((max(horizontal_window) - min(horizontal_window)) +
                       (max(vertical_window) - min(vertical_window)))
         return dispersion
-
-
-# if __name__ == "__main__":
-#     data = np.array([[1, 2], [1, 2], [1, 3], [5, 7], [5, 7]])  # Replace with your eye movement data
-#     Xs = data[:, 0]
-#     Ys = data[:, 1]
-#     detector = IDTDetector(500.0, 2, 5, 5)
-#     print(detector._identify_gaze_event_candidates(Xs, Ys, []))
