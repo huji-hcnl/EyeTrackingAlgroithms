@@ -61,3 +61,12 @@ class TestVisualAngleUtils(unittest.TestCase):
         self.assertTrue(np.array_equal(np.array([np.nan, 22.5, 22.5, 22.5, 22.5]),
                                        visang_utils.pixels_to_angular_velocities(xs, ys, ts * 2, self.D, self.PS),
                                        equal_nan=True))
+
+    def test_visual_angle_to_pixels(self):
+        self.assertTrue(np.isnan(visang_utils.visual_angle_to_pixels(d=self.D, deg=np.inf, pixel_size=self.PS)))
+        self.assertEqual(0, visang_utils.visual_angle_to_pixels(d=self.D, deg=0, pixel_size=self.PS))
+        self.assertAlmostEqual(2.0, visang_utils.visual_angle_to_pixels(d=self.D, deg=90, pixel_size=self.PS))
+        self.assertAlmostEqual(2.0, visang_utils.visual_angle_to_pixels(d=self.D, deg=-90, pixel_size=self.PS))
+        self.assertAlmostEqual(0.0261814,
+                               visang_utils.visual_angle_to_pixels(d=self.D, deg=1.5, pixel_size=self.PS))
+
