@@ -68,7 +68,7 @@ class IDTDetector(BaseDetector):
         horizontal_window = x[window_start: window_end + 1]
         vertical_window = y[window_start: window_end + 1]
 
-        # dispersion= sum of the largest horizontal and vertical distances between samples in the window
+        # dispersion = sum of the largest horizontal and vertical distances between samples in the window
         dispersion = ((max(horizontal_window) - min(horizontal_window)) +
                       (max(vertical_window) - min(vertical_window)))
         return dispersion
