@@ -4,6 +4,27 @@ from typing import Tuple
 import Utils.pixel_utils as pixel_utils
 
 
+def visual_angle_to_pixels(deg: float, d: float, pixel_size: float) -> float:
+    """
+    Calculates the number of pixels that correspond to a visual angle `deg` degrees, given that the viewer is sitting at
+    a distance of `d` centimeters from the screen, and that the size of each pixel is `pixel_size` centimeters.
+
+    See details on calculations in Kaiser, Peter K. "Calculation of Visual Angle". The Joy of Visual Perception: A Web Book:
+        http://www.yorku.ca/eye/visangle.htm
+
+    :param deg: the visual angle (in degrees).
+    :param d: the distance (in cm) from the screen.
+    :param pixel_size: the size (of the diagonal) of a pixel (in cm).
+
+    :return: the number of pixels that correspond to the given visual angle. If deg is not finite, returns np.nan.
+    """
+    if not np.isfinite(deg):
+        return np.nan
+    half_edge = d * np.tan(np.deg2rad(abs(deg) / 2))  # in cm
+    edge_pixels = 2 * half_edge / pixel_size  # edge size in pixels
+    return edge_pixels
+
+
 def pixels_to_visual_angles(xs: np.ndarray, ys: np.ndarray, d: float, pixel_size: float,
                             use_radians=False) -> np.ndarray:
     """

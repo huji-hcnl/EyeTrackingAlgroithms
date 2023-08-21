@@ -64,3 +64,15 @@ class TestPixelUtils(unittest.TestCase):
         self.assertEqual(np.pi * 3 / 4, pixel_utils.calculate_azimuth(p1=(1, 0), p2=(0, 1),
                                                                       use_radians=True, zero_direction='N'))
 
+    def test_is_in_rectangle(self):
+        tl, br = (0, 0), (1, 1)
+        self.assertTrue(pixel_utils.is_in_rectangle(p=(0, 0), top_left=tl, bottom_right=br))
+        self.assertTrue(pixel_utils.is_in_rectangle(p=(0.5, 0.5), top_left=tl, bottom_right=br))
+        self.assertTrue(pixel_utils.is_in_rectangle(p=(1, 1), top_left=tl, bottom_right=br))
+
+        self.assertFalse(pixel_utils.is_in_rectangle(p=(1.1, 1), top_left=tl, bottom_right=br))
+        self.assertFalse(pixel_utils.is_in_rectangle(p=(1, 1.1), top_left=tl, bottom_right=br))
+
+        self.assertRaises(ValueError, pixel_utils.is_in_rectangle, p=(0, np.nan), top_left=tl, bottom_right=br)
+        self.assertRaises(ValueError, pixel_utils.is_in_rectangle, p=(0.5, 0.5), top_left=br, bottom_right=tl)
+
