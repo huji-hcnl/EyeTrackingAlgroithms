@@ -55,12 +55,12 @@ def calculate_azimuth(p1: Tuple[float, float],
         raise ValueError(f"zero_direction must be one of {valid_directions}")
 
     # exit early for invalid pixels:
-    x1, y1 = p1
-    x2, y2 = p2
-    if not np.isfinite(x1) or not np.isfinite(y1) or not np.isfinite(x2) or not np.isfinite(y2):
+    if not _is_valid_pixel(p1) or not _is_valid_pixel(p2):
         return np.nan
 
     # calc angle & adjust to the desired zero direction
+    x1, y1 = p1
+    x2, y2 = p2
     angle_rad = np.arctan2(y1 - y2, x2 - x1)  # counter-clockwise angle between line (p1, p2) and right-facing x-axis
     if zero_direction == 'W':
         angle_rad += np.pi
@@ -74,3 +74,17 @@ def calculate_azimuth(p1: Tuple[float, float],
     if use_radians:
         return angle_rad
     return np.rad2deg(angle_rad)
+
+
+def is_in_rectangle(p: Tuple[float, float], top_left: Tuple[float, float], bottom_right: Tuple[float, float]) -> bool:
+    if not _is_valid_pixel(p):
+        raise ValueError(f"argument `p` must be a valid pixel: {p}")
+    if not _is_valid_pixel(top_left) or not _is_valid_pixel(bottom_right):
+        raise ValueError(f"arguments `top_left` and `bottom_right` must be valid pixels: {top_left}, {bottom_right}")
+    if top_left[0] > bottom_right[0] or top_left[1] > bottom_right[1]:
+        raise ValueError(f"argument `top_left` must be above and to the left of `bottom_right`: {top_left}, {bottom_right}")
+    return top_left[0] <= p[0] <= bottom_right[0] and top_left[1] <= p[1] <= bottom_right[1]
+
+
+def _is_valid_pixel(p: Tuple[float, float]) -> bool:
+    return np.isfinite(p[0]) and np.isfinite(p[1])

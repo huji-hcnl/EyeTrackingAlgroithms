@@ -56,6 +56,24 @@ class BaseDetector(ABC):
                                     x_l: np.ndarray, y_l: np.ndarray,
                                     x_r: np.ndarray, y_r: np.ndarray,
                                     detect_by: str = 'both') -> List[GazeEventTypeEnum]:
+        """
+        Detects event-candidates in the given gaze data from both eyes. First, candidates are detected separately for
+        each eye using detect_candidates_monocular(). Then, the candidates from both eyes are merged into a single list
+        based on the value of `detect_by`.
+
+        :param x_l: x-coordinates of gaze data from the left eye
+        :param y_l: y-coordinates of gaze data from the left eye
+        :param x_r: x-coordinates of gaze data from the right eye
+        :param y_r: y-coordinates of gaze data from the right eye
+        :param detect_by: how to merge candidates from both eyes. Valid values are:
+            - 'left': use candidates from the left eye only
+            - 'right': use candidates from the right eye only
+            - 'both'/'and': use candidates that are detected by both eyes simultaneously
+            - 'either'/'or': use candidates that are detected by either eye (or both)
+
+        :return: list of GazeEventTypeEnum values, where each value indicates the type of event that is detected at the
+            corresponding index in the given gaze data
+        """
         left_candidates = self.detect_candidates_monocular(x=x_l, y=y_l)
         right_candidates = self.detect_candidates_monocular(x=x_r, y=y_r)
 
