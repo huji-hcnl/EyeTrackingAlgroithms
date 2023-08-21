@@ -10,8 +10,6 @@ class TestVisualAngleUtils(unittest.TestCase):
 
     def test_visual_angle_between_pixels(self):
         # implausible values
-        d = 1
-        ps = 1
         self.assertEqual(45, visang_utils.visual_angle_between_pixels(p1=(0, 0), p2=(0, 1), distance_from_screen=self.D,
                                                                       pixel_size=self.PS, use_radians=False))
         self.assertEqual(45, visang_utils.visual_angle_between_pixels(p1=(0, 0), p2=(1, 0), distance_from_screen=self.D,
