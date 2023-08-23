@@ -5,7 +5,6 @@ import pandas as pd
 import numpy as np
 import requests as requests
 from scipy.io import loadmat
-from Config.ScreenMonitor import ScreenMonitor
 from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
 
 
@@ -74,8 +73,9 @@ def _extract_from_mat_file(file_data):
     number_of_samples = samples_data.shape[0]
 
     # calculate pixel size
-    screen_monitor = ScreenMonitor(screen_dim_width, screen_dim_height, 60, (screen_res_width, screen_res_height))
-    pixel_size = screen_monitor.pixel_size
+    from Config.ScreenMonitor import ScreenMonitor
+    pixel_size = ScreenMonitor.calculate_pixel_size(width=screen_dim_width, height=screen_dim_height,
+                                                    resolution=(screen_res_width, screen_res_height))
 
     return samples_data, view_dist, pixel_size, number_of_samples
 
