@@ -46,15 +46,19 @@ class ScreenMonitor:
 
     @property
     def pixel_size(self) -> float:
-        """ Returns the approximate size of one pixel in centimeters (assuming square pixels): cm/px """
-        diagonal_length = np.sqrt(np.power(self.width, 2) + np.power(self.height, 2))  # size of diagonal in centimeters
-        diagonal_pixels = np.sqrt(
-            np.power(self.resolution[0], 2) + np.power(self.resolution[1], 2))  # size of diagonal in pixels
-        return diagonal_length / diagonal_pixels
+        """ Returns the approximate length of one pixel in centimeters (assuming square pixels): cm/px """
+        return self.calculate_pixel_size(self.width, self.height, self.resolution)
 
     def pixels_to_centimeters(self, num_pixels: float) -> float:
         """ Converts pixels to centimeters """
         return num_pixels * self.pixel_size
+
+    @staticmethod
+    def calculate_pixel_size(width: float, height: float, resolution: Tuple[int, int]) -> float:
+        """ Calculates the approximate length of one pixel in centimeters (assuming square pixels): cm/px """
+        diagonal_length = np.sqrt(np.power(width, 2) + np.power(height, 2))  # size of diagonal in centimeters
+        diagonal_pixels = np.sqrt(np.power(resolution[0], 2) + np.power(resolution[1], 2))  # size of diagonal in pixels
+        return diagonal_length / diagonal_pixels
 
     def centimeters_to_pixels(self, num_centimeters: float) -> float:
         """ Converts centimeters to pixels """
