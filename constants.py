@@ -17,10 +17,11 @@ STIMULUS = "stimulus"
 MILLISECONDS = "milliseconds"
 MICROSECONDS = "microseconds"
 EVENT_TYPE = "event_type"
+SAMPLING_RATE = "sampling_rate"
+
 LEFT = "left"
 RIGHT = "right"
 PUPIL = "pupil"
-
 LEFT_X, RIGHT_X = f"{LEFT}_x", f"{RIGHT}_x"
 LEFT_Y, RIGHT_Y = f"{LEFT}_y", f"{RIGHT}_y"
 LEFT_PUPIL, RIGHT_PUPIL = f"{LEFT}_{PUPIL}", f"{RIGHT}_{PUPIL}"
