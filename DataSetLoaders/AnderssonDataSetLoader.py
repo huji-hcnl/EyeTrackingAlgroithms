@@ -7,7 +7,7 @@ from abc import ABC
 from typing import List, Tuple
 
 import constants as cnst
-from DataSets.BaseDataSetLoader import BaseDataSetLoader
+from DataSetLoaders.BaseDataSetLoader import BaseDataSetLoader
 
 
 class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
