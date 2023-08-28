@@ -15,7 +15,9 @@ class BaseDataSetLoader(ABCMeta):
         response = req.get(cls._URL)
         if response.status_code != 200:
             raise RuntimeError(f"Failed to download dataset from {cls._URL}")
-        return cls._from_remote_impl(response)
+        df = cls._from_remote_impl(response)
+        df = df[cls.columns()]  # reorder columns
+        return df
 
     @classmethod
     def save_to_pickle(cls, df: pd.DataFrame, path_file: str = None) -> None:
