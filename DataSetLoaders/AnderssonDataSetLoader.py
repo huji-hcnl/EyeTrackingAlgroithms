@@ -42,7 +42,7 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
             if not filename.endswith(".mat"):
                 continue
             mat_file = zip_file.open(filename)
-            df = cls._read_mat_file(mat_file)
+            df = cls.__read_mat_file(mat_file)
             dataframes.append(df)
         df = pd.concat(dataframes, ignore_index=True, axis=0)
         return df
@@ -59,7 +59,7 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
         return df
 
     @classmethod
-    def _read_mat_file(cls, mat_file) -> pd.DataFrame:
+    def __read_mat_file(cls, mat_file) -> pd.DataFrame:
         gaze_data = cls.__handle_mat_file_data(mat_file)
         subject_id, stimulus_type, stimulus_name, rater = cls.__handle_mat_file_name(mat_file.name)
         gaze_data[cls.__SUBJECT_ID] = subject_id
