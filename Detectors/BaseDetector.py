@@ -22,6 +22,7 @@ class BaseDetector(ABC):
     pre-defined logic (e.g. both eyes must detect a candidate for it to be considered a binocular candidate).
     """
 
+    _MISSING_VALUE: float = np.nan  # value that represents missing data in the gaze data
     _MINIMUM_TIME_WITHIN_EVENT: float = 5  # min duration of single event (in milliseconds)
     _MINIMUM_TIME_BETWEEN_IDENTICAL_EVENTS: float = 5  # min duration between identical events (in milliseconds)
 
@@ -116,7 +117,9 @@ class BaseDetector(ABC):
         Returns the modified gaze data and a list of event candidates including where the blinks were detected.
         """
         candidates = np.full_like(x, GazeEventTypeEnum.UNDEFINED)
-        candidates[np.isnan(x) | np.isnan(y)] = GazeEventTypeEnum.BLINK
+        x_missing = np.array([self._is_missing_value(val) for val in x])
+        y_missing = np.array([self._is_missing_value(val) for val in y])
+        candidates[x_missing | y_missing] = GazeEventTypeEnum.BLINK
 
         # TODO: add blink correction before/after NaNs
 
@@ -191,3 +194,9 @@ class BaseDetector(ABC):
     def _minimum_samples_between_identical_events(self) -> int:
         """ minimum number of samples between identical events """
         return round(self._MINIMUM_TIME_BETWEEN_IDENTICAL_EVENTS * self._sr / 1000)
+
+    @classmethod
+    def _is_missing_value(cls, value: float) -> bool:
+        if np.isnan(cls._MISSING_VALUE):
+            return np.isnan(value)
+        return value == cls._MISSING_VALUE
