@@ -86,5 +86,15 @@ def is_in_rectangle(p: Tuple[float, float], top_left: Tuple[float, float], botto
     return top_left[0] <= p[0] <= bottom_right[0] and top_left[1] <= p[1] <= bottom_right[1]
 
 
+def is_in_circle(p: Tuple[float, float], center: Tuple[float, float], radius: float) -> bool:
+    if not _is_valid_pixel(p):
+        raise ValueError(f"argument `p` must be a valid pixel: {p}")
+    if not _is_valid_pixel(center):
+        raise ValueError(f"argument `center` must be a valid pixel: {center}")
+    if not np.isfinite(radius) or radius < 0:
+        raise ValueError(f"argument `radius` must be a finite non-negative number: {radius}")
+    return np.sqrt(np.power(p[0] - center[0], 2) + np.power(p[1] - center[1], 2)) <= radius
+
+
 def _is_valid_pixel(p: Tuple[float, float]) -> bool:
     return np.isfinite(p[0]) and np.isfinite(p[1])

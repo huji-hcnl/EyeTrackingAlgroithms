@@ -76,3 +76,20 @@ class TestPixelUtils(unittest.TestCase):
         self.assertRaises(ValueError, pixel_utils.is_in_rectangle, p=(0, np.nan), top_left=tl, bottom_right=br)
         self.assertRaises(ValueError, pixel_utils.is_in_rectangle, p=(0.5, 0.5), top_left=br, bottom_right=tl)
 
+    def test_is_in_circle(self):
+        c = (0, 0)
+        r = 1
+        self.assertTrue(pixel_utils.is_in_circle(p=(0, 0), center=c, radius=r))
+        self.assertTrue(pixel_utils.is_in_circle(p=(0.5, 0.5), center=c, radius=r))
+        self.assertTrue(pixel_utils.is_in_circle(p=(1, 0), center=c, radius=r))
+        self.assertTrue(pixel_utils.is_in_circle(p=(0, -1), center=c, radius=r))
+
+        self.assertFalse(pixel_utils.is_in_circle(p=(1, 1), center=c, radius=r))
+        self.assertFalse(pixel_utils.is_in_circle(p=(1, -1), center=c, radius=r))
+
+        self.assertRaises(ValueError, pixel_utils.is_in_circle, p=(0, np.nan), center=c, radius=r)
+        self.assertRaises(ValueError, pixel_utils.is_in_circle, p=(0.5, 0.5), center=(np.nan, 0), radius=r)
+        self.assertRaises(ValueError, pixel_utils.is_in_circle, p=(0.5, 0.5), center=c, radius=-1)
+
+
+
