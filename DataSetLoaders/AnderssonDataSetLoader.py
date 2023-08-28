@@ -32,7 +32,7 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
                 cnst.MILLISECONDS, cnst.RIGHT_X, cnst.RIGHT_Y, cnst.EVENT_TYPE, cls.__RATER_NAME]
 
     @classmethod
-    def _from_remote_impl(cls, response: req.Response) -> pd.DataFrame:
+    def _parse_response(cls, response: req.Response) -> pd.DataFrame:
         import io
         import zipfile
         zip_file = zipfile.ZipFile(io.BytesIO(response.content))

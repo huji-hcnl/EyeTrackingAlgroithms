@@ -15,7 +15,7 @@ class BaseDataSetLoader(ABCMeta):
         response = req.get(cls._URL)
         if response.status_code != 200:
             raise RuntimeError(f"Failed to download dataset from {cls._URL}")
-        df = cls._from_remote_impl(response)
+        df = cls._parse_response(response)
         df = df[cls.columns()]  # reorder columns
         return df
 
@@ -42,7 +42,7 @@ class BaseDataSetLoader(ABCMeta):
 
     @classmethod
     @abstractmethod
-    def _from_remote_impl(cls, response: req.Response) -> pd.DataFrame:
+    def _parse_response(cls, response: req.Response) -> pd.DataFrame:
         raise NotImplementedError
 
     def __init_subclass__(cls, **kwargs):
