@@ -48,6 +48,17 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
         return df
 
     @classmethod
+    def _replace_missing_values(cls, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        This dataset marks missing values as samples with X,Y coordinates of (0,0). We replace these values with NaNs.
+        """
+        x_missing = df[cnst.RIGHT_X] == 0
+        y_missing = df[cnst.RIGHT_Y] == 0
+        df[cnst.RIGHT_X][x_missing & y_missing] = np.nan
+        df[cnst.RIGHT_Y][x_missing & y_missing] = np.nan
+        return df
+
+    @classmethod
     def _read_mat_file(cls, mat_file) -> pd.DataFrame:
         gaze_data = cls.__handle_mat_file_data(mat_file)
         subject_id, stimulus_type, stimulus_name, rater = cls.__handle_mat_file_name(mat_file.name)
