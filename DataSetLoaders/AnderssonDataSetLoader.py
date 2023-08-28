@@ -111,7 +111,7 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
         Returns an arrays of timestamps per each sample, in milliseconds.
         The original timestamps of the Anderson dataset are either an array of microseconds or an array of NaNs.
         """
-        if np.isnan(timestamps).all():
+        if np.isnan(timestamps).any():
             num_samples = len(timestamps)
             timestamps = np.arange(num_samples) * cnst.MILLISECONDS_PER_SECOND / sampling_rate
             return timestamps
