@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 import requests as req
 from abc import ABCMeta, abstractmethod
