@@ -49,12 +49,6 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
         return df
 
     @classmethod
-    def _from_local_impl(cls, local_path: str) -> pd.DataFrame:
-        df = pd.read_pickle(local_path)
-        df = df[cls.columns()]  # reorder columns
-        return df
-
-    @classmethod
     def _read_mat_file(cls, mat_file) -> pd.DataFrame:
         gaze_data = cls.__handle_mat_file_data(mat_file)
         subject_id, stimulus_type, stimulus_name, rater = cls.__handle_mat_file_name(mat_file.name)
