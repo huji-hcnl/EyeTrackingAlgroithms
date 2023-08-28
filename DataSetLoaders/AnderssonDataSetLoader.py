@@ -32,7 +32,7 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
                 cnst.MILLISECONDS, cnst.RIGHT_X, cnst.RIGHT_Y, cnst.EVENT_TYPE, cls.__RATER_NAME]
 
     @classmethod
-    def _from_remote_impl(cls, response: req.Response) -> pd.DataFrame:
+    def _parse_response(cls, response: req.Response) -> pd.DataFrame:
         import io
         import zipfile
         zip_file = zipfile.ZipFile(io.BytesIO(response.content))
@@ -45,13 +45,17 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
             df = cls._read_mat_file(mat_file)
             dataframes.append(df)
         df = pd.concat(dataframes, ignore_index=True, axis=0)
-        df = df[cls.columns()]  # reorder columns
         return df
 
     @classmethod
-    def _from_local_impl(cls, local_path: str) -> pd.DataFrame:
-        df = pd.read_pickle(local_path)
-        df = df[cls.columns()]  # reorder columns
+    def _replace_missing_values(cls, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        This dataset marks missing values as samples with X,Y coordinates of (0,0). We replace these values with NaNs.
+        """
+        x_missing = df[cnst.RIGHT_X] == 0
+        y_missing = df[cnst.RIGHT_Y] == 0
+        df[cnst.RIGHT_X][x_missing & y_missing] = np.nan
+        df[cnst.RIGHT_Y][x_missing & y_missing] = np.nan
         return df
 
     @classmethod
@@ -117,7 +121,7 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
         Returns an arrays of timestamps per each sample, in milliseconds.
         The original timestamps of the Anderson dataset are either an array of microseconds or an array of NaNs.
         """
-        if np.isnan(timestamps).all():
+        if np.isnan(timestamps).any():
             num_samples = len(timestamps)
             timestamps = np.arange(num_samples) * cnst.MILLISECONDS_PER_SECOND / sampling_rate
             return timestamps

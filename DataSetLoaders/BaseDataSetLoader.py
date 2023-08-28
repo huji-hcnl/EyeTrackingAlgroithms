@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 import requests as req
 from abc import ABCMeta, abstractmethod
@@ -11,18 +10,14 @@ class BaseDataSetLoader(ABCMeta):
 
     @classmethod
     def from_remote(cls) -> pd.DataFrame:
-        """ Loads the dataset from a remote URL """
+        """ Loads the dataset from a remote URL, parses it and returns a DataFrame. """
         response = req.get(cls._URL)
         if response.status_code != 200:
             raise RuntimeError(f"Failed to download dataset from {cls._URL}")
-        return cls._from_remote_impl(response)
-
-    @classmethod
-    def from_local(cls, local_path: str) -> pd.DataFrame:
-        """ Loads the dataset from a local file """
-        if not os.path.exists(local_path):
-            raise FileNotFoundError(f"Could not find local file: {local_path}")
-        return cls._from_local_impl(local_path)
+        df = cls._parse_response(response)
+        df = cls._replace_missing_values(df)
+        df = df[cls.columns()]  # reorder columns
+        return df
 
     @classmethod
     def save_to_pickle(cls, df: pd.DataFrame, path_file: str = None) -> None:
@@ -47,12 +42,12 @@ class BaseDataSetLoader(ABCMeta):
 
     @classmethod
     @abstractmethod
-    def _from_remote_impl(cls, response: req.Response) -> pd.DataFrame:
+    def _parse_response(cls, response: req.Response) -> pd.DataFrame:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def _from_local_impl(cls, local_path: str) -> pd.DataFrame:
+    def _replace_missing_values(cls, df: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError
 
     def __init_subclass__(cls, **kwargs):
