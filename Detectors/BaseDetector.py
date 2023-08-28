@@ -143,7 +143,7 @@ class BaseDetector(ABC):
         for chunk_idx in chunk_indices:
             if len(chunk_idx) < self._minimum_samples_within_event:
                 arr_copy[chunk_idx] = GazeEventTypeEnum.UNDEFINED
-        return arr_copy.tolist()
+        return list(arr_copy)
 
     @final
     def _merge_proximal_chunks_of_identical_values(self, arr,
