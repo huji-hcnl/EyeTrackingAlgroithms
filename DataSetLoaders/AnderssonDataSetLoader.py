@@ -45,7 +45,6 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
             df = cls._read_mat_file(mat_file)
             dataframes.append(df)
         df = pd.concat(dataframes, ignore_index=True, axis=0)
-        df = df[cls.columns()]  # reorder columns
         return df
 
     @classmethod
