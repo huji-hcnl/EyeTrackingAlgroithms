@@ -26,8 +26,9 @@ class BaseDetector(ABC):
     _MINIMUM_TIME_WITHIN_EVENT: float = 5  # min duration of single event (in milliseconds)
     _MINIMUM_TIME_BETWEEN_IDENTICAL_EVENTS: float = 5  # min duration between identical events (in milliseconds)
 
-    def __init__(self, sr: float):
+    def __init__(self, sr: float, missing_value: float = _MISSING_VALUE):
         self._sr = sr  # sampling rate in Hz
+        self._missing_value = missing_value
 
     @final
     def detect_candidates_monocular(self, x: np.ndarray, y: np.ndarray) -> List[GazeEventTypeEnum]:
@@ -195,8 +196,7 @@ class BaseDetector(ABC):
         """ minimum number of samples between identical events """
         return round(self._MINIMUM_TIME_BETWEEN_IDENTICAL_EVENTS * self._sr / 1000)
 
-    @classmethod
-    def _is_missing_value(cls, value: float) -> bool:
-        if np.isnan(cls._MISSING_VALUE):
+    def _is_missing_value(self, value: float) -> bool:
+        if np.isnan(self._missing_value):
             return np.isnan(value)
-        return value == cls._MISSING_VALUE
+        return value == self._missing_value
