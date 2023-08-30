@@ -28,7 +28,7 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
     @classmethod
     def columns(cls) -> List[str]:
         return [cnst.SUBJECT_ID, cls.__VIEWER_DISTANCE_CM, cnst.STIMULUS, cls.__STIMULUS_NAME, cls.__PIXEL_SIZE_CM,
-                cnst.MILLISECONDS, cnst.RIGHT_X, cnst.RIGHT_Y, cnst.EVENT_TYPE, cls.__RATER_NAME]
+                cls.__RATER_NAME, cnst.MILLISECONDS, cnst.RIGHT_X, cnst.RIGHT_Y, cnst.EVENT_TYPE]
 
     @classmethod
     def _parse_response(cls, response: req.Response) -> pd.DataFrame:
