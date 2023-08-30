@@ -2,6 +2,7 @@ import warnings as w
 import pandas as pd
 from typing import List, Union
 
+import constants as cnst
 import Utils.array_utils as arr_utils
 from Config.GazeEventTypeEnum import GazeEventTypeEnum
 from GazeEvents.BlinkEvent import BlinkEvent
@@ -42,16 +43,16 @@ def _create_event(event_data: pd.DataFrame, event_type: GazeEventTypeEnum,
     if event_type == GazeEventTypeEnum.UNDEFINED:
         return None
     if event_type == GazeEventTypeEnum.FIXATION:
-        return FixationEvent(timestamps=event_data["timestamp"].values,
+        return FixationEvent(timestamps=event_data[cnst.MILLISECONDS].values,
                              x=event_data[f"{eye}_x"].values,
                              y=event_data[f"{eye}_y"].values,
-                             pupil=event_data[f"{eye}_pupil"].values,
+                             pupil=event_data[f"{eye}_{cnst.PUPIL}"].values,
                              viewer_distance=viewer_distance)
     if event_type == GazeEventTypeEnum.SACCADE:
-        return SaccadeEvent(timestamps=event_data["timestamp"].values,
+        return SaccadeEvent(timestamps=event_data[cnst.MILLISECONDS].values,
                             x=event_data[f"{eye}_x"].values,
                             y=event_data[f"{eye}_y"].values,
                             viewer_distance=viewer_distance)
     if event_type == GazeEventTypeEnum.BLINK:
-        return BlinkEvent(timestamps=event_data["timestamp"].values)
+        return BlinkEvent(timestamps=event_data[cnst.MILLISECONDS].values)
     raise ValueError(f"Unknown event type: {event_type}")
