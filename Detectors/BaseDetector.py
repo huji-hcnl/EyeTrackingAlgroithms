@@ -31,7 +31,8 @@ class BaseDetector(ABC):
         self._missing_value = missing_value
 
     @final
-    def detect_candidates_monocular(self, x: np.ndarray, y: np.ndarray) -> List[GazeEventTypeEnum]:
+    def detect_candidates_monocular(self, x: np.ndarray, y: np.ndarray,
+                                    expand_blink_by_ms: int = 0) -> List[GazeEventTypeEnum]:
         """
         Detects event-candidates in the given gaze data from a single eye. Detection steps:
         1. Verify that x and y are valid inputs
@@ -42,6 +43,9 @@ class BaseDetector(ABC):
 
         :param x: x-coordinates of gaze data from a single eye
         :param y: y-coordinates of gaze data from a single eye
+        :param expand_blink_by_ms: number of milliseconds to expand the blink candidates by. For example, if
+            `expand_blink_by_ms=20`, then 20ms-worth-samples before and after each blink candidate will also be marked
+            as blink candidates. This is useful for correcting blinks that are detected too late or too early.
 
         :return: list of GazeEventTypeEnum values, where each value indicates the type of event that is detected at the
             corresponding index in the given gaze data
@@ -49,7 +53,7 @@ class BaseDetector(ABC):
         candidates = np.full_like(x, GazeEventTypeEnum.UNDEFINED)
         try:
             x, y = self._verify_inputs(x, y)
-            x, y, candidates = self._identify_blink_candidates(x, y, candidates)
+            x, y, candidates = self._identify_blink_candidates(x, y, candidates, expand_blink_by_ms)
             candidates = self._identify_gaze_event_candidates(x, y, candidates)
             candidates = self._set_short_chunks_as_undefined(candidates)
             candidates = self._merge_proximal_chunks_of_identical_values(candidates)
@@ -61,6 +65,7 @@ class BaseDetector(ABC):
     def detect_candidates_binocular(self,
                                     x_l: np.ndarray, y_l: np.ndarray,
                                     x_r: np.ndarray, y_r: np.ndarray,
+                                    expand_blink_by_ms: int = 0,
                                     detect_by: str = 'both') -> List[GazeEventTypeEnum]:
         """
         Detects event-candidates in the given gaze data from both eyes. First, candidates are detected separately for
@@ -71,6 +76,9 @@ class BaseDetector(ABC):
         :param y_l: y-coordinates of gaze data from the left eye
         :param x_r: x-coordinates of gaze data from the right eye
         :param y_r: y-coordinates of gaze data from the right eye
+        :param expand_blink_by_ms: number of milliseconds to expand the blink candidates by. For example, if
+            `expand_blink_by_ms=20`, then 20ms-worth-samples before and after each blink candidate will also be marked
+            as blink candidates. This is useful for correcting blinks that are detected too late or too early.
         :param detect_by: how to merge candidates from both eyes. Valid values are:
             - 'left': use candidates from the left eye only
             - 'right': use candidates from the right eye only
@@ -80,8 +88,8 @@ class BaseDetector(ABC):
         :return: list of GazeEventTypeEnum values, where each value indicates the type of event that is detected at the
             corresponding index in the given gaze data
         """
-        left_candidates = self.detect_candidates_monocular(x=x_l, y=y_l)
-        right_candidates = self.detect_candidates_monocular(x=x_r, y=y_r)
+        left_candidates = self.detect_candidates_monocular(x=x_l, y=y_l, expand_blink_by_ms=expand_blink_by_ms)
+        right_candidates = self.detect_candidates_monocular(x=x_r, y=y_r, expand_blink_by_ms=expand_blink_by_ms)
 
         detect_by = detect_by.lower()
         if detect_by == cnst.LEFT:
@@ -117,7 +125,8 @@ class BaseDetector(ABC):
 
     @final
     def _identify_blink_candidates(self, x: np.ndarray, y: np.ndarray,
-                                   candidates: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+                                   candidates: np.ndarray,
+                                   expand_blink_by_ms: int = 0) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Identifies blink candidates in the given gaze data:
         1. Marks samples with missing gaze data (i.e. x or y is NaN) as blink candidates
@@ -125,22 +134,38 @@ class BaseDetector(ABC):
         samples).
         3. Merges blink candidates that are close to each other (i.e. less than `self._minimum_samples_between_identical_events`
         samples apart).
-        4. Modifies the gaze data by setting the x and y coordinates of blink candidates to NaN.
+        4. Expands blink candidates by `expand_blink_by_ms` milliseconds, i.e. marks samples that are `expand_blink_by_ms`
+        milliseconds before and after each blink candidate as blink candidates as well.
+        5. Modifies the gaze data by setting the x and y coordinates of blink candidates to NaN.
 
         :param x: x-coordinates of gaze data from a single eye
         :param y: y-coordinates of gaze data from a single eye
         :param candidates: list of event candidates, where each value indicates the type of event that is detected at
             the corresponding index in the given gaze data
+        :param expand_blink_by_ms: number of milliseconds to expand the blink candidates by. For example, if
+            `expand_blink_by_ms=20`, then 20ms-worth-samples before and after each blink candidate will also be marked
+            as blink candidates. This is useful for correcting blinks that are detected too late or too early.
 
         :return: modified x and y coordinates, and a list of event candidates including where the blinks were detected
         """
+        if expand_blink_by_ms < 0:
+            raise ValueError("Argument `expand_blink_by_ms` must be non-negative")
+
         candidates_copy = np.asarray(candidates, dtype=GazeEventTypeEnum).copy()
         x_missing = np.array([self._is_missing_value(val) for val in x])
         y_missing = np.array([self._is_missing_value(val) for val in y])
         candidates_copy[x_missing | y_missing] = GazeEventTypeEnum.BLINK
         candidates_copy = self._set_short_chunks_as_undefined(candidates_copy)
         candidates_copy = self._merge_proximal_chunks_of_identical_values(candidates_copy)
-        # TODO: add blink correction before/after NaNs
+
+        # wherever there's a blink candidate, expand it by `expand_blink_by_ms` milliseconds
+        if expand_blink_by_ms > 0:
+            expand_blink_by_samples = round(expand_blink_by_ms * self._sr / 1000)
+            blink_indices = np.where(candidates_copy == GazeEventTypeEnum.BLINK)[0]
+            for blink_idx in blink_indices:
+                blink_start = max(0, blink_idx - expand_blink_by_samples)
+                blink_end = min(len(candidates_copy), blink_idx + expand_blink_by_samples)
+                candidates_copy[blink_start:blink_end] = GazeEventTypeEnum.BLINK
 
         x_copy = x.copy()
         y_copy = y.copy()
