@@ -31,16 +31,17 @@ class BaseDetector(ABC):
         self._missing_value = missing_value
 
     @final
-    def detect_candidates_monocular(self, x: np.ndarray, y: np.ndarray,
+    def detect_candidates_monocular(self, t: np.ndarray, x: np.ndarray, y: np.ndarray,
                                     expand_blink_by_ms: int = 0) -> List[GazeEventTypeEnum]:
         """
         Detects event-candidates in the given gaze data from a single eye. Detection steps:
-        1. Verify that x and y are valid inputs
+        1. Verify that t, x and y are valid inputs
         2. Detect blink candidates when there is missing gaze data
         3. Find event candidates based on each Detector's implementation of _identify_event_candidates()
         4. Fill short chunks of event candidates with GazeEventTypeEnum.UNDEFINED
         5. Merge chunks of identical event candidates that are close to each other
 
+        :param t: timestamps of gaze data from a single eye
         :param x: x-coordinates of gaze data from a single eye
         :param y: y-coordinates of gaze data from a single eye
         :param expand_blink_by_ms: number of milliseconds to expand the blink candidates by. For example, if
@@ -52,7 +53,7 @@ class BaseDetector(ABC):
         """
         candidates = np.full_like(x, GazeEventTypeEnum.UNDEFINED)
         try:
-            x, y = self._verify_inputs(x, y)
+            t, x, y = self._verify_inputs(t, x, y)
             x, y, candidates = self._identify_blink_candidates(x, y, candidates, expand_blink_by_ms)
             candidates = self._identify_gaze_event_candidates(x, y, candidates)
             candidates = self._set_short_chunks_as_undefined(candidates)
@@ -63,6 +64,7 @@ class BaseDetector(ABC):
 
     @final
     def detect_candidates_binocular(self,
+                                    t: np.ndarray,
                                     x_l: np.ndarray, y_l: np.ndarray,
                                     x_r: np.ndarray, y_r: np.ndarray,
                                     expand_blink_by_ms: int = 0,
@@ -72,6 +74,7 @@ class BaseDetector(ABC):
         each eye using detect_candidates_monocular(). Then, the candidates from both eyes are merged into a single list
         based on the value of `detect_by`.
 
+        :param t: timestamps of gaze data
         :param x_l: x-coordinates of gaze data from the left eye
         :param y_l: y-coordinates of gaze data from the left eye
         :param x_r: x-coordinates of gaze data from the right eye
@@ -112,16 +115,19 @@ class BaseDetector(ABC):
 
         raise ValueError(f"invalid value for `detect_by`: {detect_by}")
 
-    def _verify_inputs(self, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _verify_inputs(self, t: np.ndarray, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        if not arr_utils.is_one_dimensional(t):
+            raise ValueError("`t` must be one-dimensional")
         if not arr_utils.is_one_dimensional(x):
-            raise ValueError("x must be one-dimensional")
+            raise ValueError("`x` must be one-dimensional")
         if not arr_utils.is_one_dimensional(y):
-            raise ValueError("y must be one-dimensional")
+            raise ValueError("`y` must be one-dimensional")
+        t = t.reshape(-1)
         x = x.reshape(-1)
         y = y.reshape(-1)
-        if len(x) != len(y):
-            raise ValueError("x and y must have the same length")
-        return x, y
+        if len(t) != len(x) or len(t) != len(y) or len(x) != len(y):
+            raise ValueError("t, x and y must have the same length")
+        return t, x, y
 
     @final
     def _identify_blink_candidates(self, x: np.ndarray, y: np.ndarray,
