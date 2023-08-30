@@ -46,8 +46,9 @@ class BaseDetector(ABC):
         :return: list of GazeEventTypeEnum values, where each value indicates the type of event that is detected at the
             corresponding index in the given gaze data
         """
+        candidates = np.full_like(x, GazeEventTypeEnum.UNDEFINED)
         x, y = self._verify_inputs(x, y)
-        x, y, candidates = self._identify_blink_candidates(x, y)
+        x, y, candidates = self._identify_blink_candidates(x, y, candidates)
         candidates = self._identify_gaze_event_candidates(x, y, candidates)
         candidates = self._set_short_chunks_as_undefined(candidates)
         candidates = self._merge_proximal_chunks_of_identical_values(candidates)
@@ -112,7 +113,8 @@ class BaseDetector(ABC):
         return x, y
 
     @final
-    def _identify_blink_candidates(self, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray, List[GazeEventTypeEnum]]:
+    def _identify_blink_candidates(self, x: np.ndarray, y: np.ndarray,
+                                   candidates: np.ndarray) -> Tuple[np.ndarray, np.ndarray, List[GazeEventTypeEnum]]:
         """
         Identifies blink candidates in the given gaze data:
         1. Marks samples with missing gaze data (i.e. x or y is NaN) as blink candidates
@@ -124,22 +126,25 @@ class BaseDetector(ABC):
 
         :param x: x-coordinates of gaze data from a single eye
         :param y: y-coordinates of gaze data from a single eye
+        :param candidates: list of event candidates, where each value indicates the type of event that is detected at
+            the corresponding index in the given gaze data
 
         :return: modified x and y coordinates, and a list of event candidates including where the blinks were detected
         """
-        candidates = np.full_like(x, GazeEventTypeEnum.UNDEFINED)
+        candidates_copy = np.asarray(candidates).copy()
         x_missing = np.array([self._is_missing_value(val) for val in x])
         y_missing = np.array([self._is_missing_value(val) for val in y])
-        candidates[x_missing | y_missing] = GazeEventTypeEnum.BLINK
-        candidates = self._set_short_chunks_as_undefined(candidates)
-        candidates = self._merge_proximal_chunks_of_identical_values(candidates,
-                                                                     allow_short_chunks_of={GazeEventTypeEnum.UNDEFINED})
+        candidates_copy[x_missing | y_missing] = GazeEventTypeEnum.BLINK
+        candidates_copy = self._set_short_chunks_as_undefined(candidates_copy)
+        candidates_copy = self._merge_proximal_chunks_of_identical_values(candidates_copy,
+                                                                          allow_short_chunks_of={
+                                                                              GazeEventTypeEnum.UNDEFINED})
 
         # TODO: add blink correction before/after NaNs
 
-        x[candidates == GazeEventTypeEnum.BLINK] = np.nan
-        y[candidates == GazeEventTypeEnum.BLINK] = np.nan
-        return x, y, list(candidates)
+        x[candidates_copy == GazeEventTypeEnum.BLINK] = np.nan
+        y[candidates_copy == GazeEventTypeEnum.BLINK] = np.nan
+        return x, y, list(candidates_copy)
 
     @abstractmethod
     def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray,
