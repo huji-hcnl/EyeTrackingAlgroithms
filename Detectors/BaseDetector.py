@@ -195,7 +195,7 @@ class BaseDetector(ABC):
         arr_copy = np.asarray(arr).copy()
         chunk_indices = arr_utils.get_chunk_indices(arr)
         for chunk_idx in chunk_indices:
-            if len(chunk_idx) < self._minimum_samples_within_event:
+            if len(chunk_idx) < self._minimum_samples_within_event():
                 arr_copy[chunk_idx] = GazeEventTypeEnum.UNDEFINED
         return arr_copy
 
@@ -216,7 +216,7 @@ class BaseDetector(ABC):
             if i == 0 or i == len(chunk_indices) - 1:
                 # ignore the first and last chunk
                 continue
-            if len(middle_chunk) >= self._minimum_samples_between_identical_events:
+            if len(middle_chunk) >= self._minimum_samples_between_identical_events():
                 # ignore chunks that are long enough
                 continue
             middle_chunk_value = arr_copy[middle_chunk[0]]
@@ -234,17 +234,32 @@ class BaseDetector(ABC):
             arr_copy[middle_chunk] = left_chunk_value
         return arr_copy
 
-    @property
     @final
-    def _minimum_samples_within_event(self) -> int:
-        """ minimum number of samples within a single event """
+    def _minimum_samples_within_event(self, ms: np.ndarray) -> int:
+        """
+        Calculates the minimum number of samples within a single event
+        :param ms: timestamps in milliseconds (floating-point, not integer)
+        """
         return round(self._MINIMUM_TIME_WITHIN_EVENT * self._sr / 1000)
 
-    @property
     @final
-    def _minimum_samples_between_identical_events(self) -> int:
-        """ minimum number of samples between identical events """
+    def _minimum_samples_between_identical_events(self, ms: np.ndarray) -> int:
+        """
+        Calculates the minimum number of samples between identical events
+        :param ms: timestamps in milliseconds (floating-point, not integer)
+        """
         return round(self._MINIMUM_TIME_BETWEEN_IDENTICAL_EVENTS * self._sr / 1000)
+
+    @staticmethod
+    @final
+    def _calculate_sampling_rate(ms: np.ndarray) -> float:
+        """
+        Calculates the sampling rate of the given timestamps in Hz.
+        :param ms: timestamps in milliseconds (floating-point, not integer)
+        """
+        if len(ms) < 2:
+            raise ValueError("timestamps must be of length at least 2")
+        return cnst.MILLISECONDS_PER_SECOND / np.median(np.diff(ms))
 
     def _is_missing_value(self, value: float) -> bool:
         if np.isnan(self._missing_value):
