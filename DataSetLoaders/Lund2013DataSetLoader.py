@@ -10,7 +10,7 @@ import constants as cnst
 from DataSetLoaders.BaseDataSetLoader import BaseDataSetLoader
 
 
-class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
+class Lund2013DataSetLoader(BaseDataSetLoader, ABC):
     """
     Loads the dataset presented in the article:
     Andersson, R., Larsson, L., Holmqvist, K., Stridh, M., & Nyström, M. (2017): One algorithm to rule them all? An
@@ -115,15 +115,15 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
         from Config.GazeEventTypeEnum import get_event_type
         samples_data = eyetracking_data_dict['pos']
         right_x, right_y = samples_data[:, 3:5].T
-        timestamps = AnderssonDataSetLoader.__calculate_timestamps(samples_data[:, 0], sampling_rate)
+        timestamps = Lund2013DataSetLoader.__calculate_timestamps(samples_data[:, 0], sampling_rate)
         labels = [get_event_type(int(event_type), safe=True) for event_type in samples_data[:, 5]]
 
         # create dataframe:
         df = pd.DataFrame(data={cnst.MILLISECONDS: timestamps,
                                 cnst.RIGHT_X: right_x, cnst.RIGHT_Y: right_y,
                                 cnst.EVENT_TYPE: labels})
-        df[AnderssonDataSetLoader.__VIEWER_DISTANCE_CM] = view_dist
-        df[AnderssonDataSetLoader.__PIXEL_SIZE_CM] = pixel_size
+        df[Lund2013DataSetLoader.__VIEWER_DISTANCE_CM] = view_dist
+        df[Lund2013DataSetLoader.__PIXEL_SIZE_CM] = pixel_size
         return df
 
     @staticmethod
