@@ -24,11 +24,10 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
     __RATER_NAME = "rater_name"
     __PIXEL_SIZE_CM = "pixel_size_cm"
     __VIEWER_DISTANCE_CM = "viewer_distance_cm"
-    __SUBJECT_ID = "subject_id"
 
     @classmethod
     def columns(cls) -> List[str]:
-        return [cls.__SUBJECT_ID, cls.__VIEWER_DISTANCE_CM, cnst.STIMULUS, cls.__STIMULUS_NAME, cls.__PIXEL_SIZE_CM,
+        return [cnst.SUBJECT_ID, cls.__VIEWER_DISTANCE_CM, cnst.STIMULUS, cls.__STIMULUS_NAME, cls.__PIXEL_SIZE_CM,
                 cnst.MILLISECONDS, cnst.RIGHT_X, cnst.RIGHT_Y, cnst.EVENT_TYPE, cls.__RATER_NAME]
 
     @classmethod
