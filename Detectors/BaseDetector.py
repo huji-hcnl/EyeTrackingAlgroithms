@@ -47,11 +47,14 @@ class BaseDetector(ABC):
             corresponding index in the given gaze data
         """
         candidates = np.full_like(x, GazeEventTypeEnum.UNDEFINED)
-        x, y = self._verify_inputs(x, y)
-        x, y, candidates = self._identify_blink_candidates(x, y, candidates)
-        candidates = self._identify_gaze_event_candidates(x, y, candidates)
-        candidates = self._set_short_chunks_as_undefined(candidates)
-        candidates = self._merge_proximal_chunks_of_identical_values(candidates)
+        try:
+            x, y = self._verify_inputs(x, y)
+            x, y, candidates = self._identify_blink_candidates(x, y, candidates)
+            candidates = self._identify_gaze_event_candidates(x, y, candidates)
+            candidates = self._set_short_chunks_as_undefined(candidates)
+            candidates = self._merge_proximal_chunks_of_identical_values(candidates)
+        except ValueError as e:
+            print(f"WARNING: {e}")
         return list(candidates)
 
     @final
