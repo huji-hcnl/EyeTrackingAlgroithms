@@ -1,7 +1,9 @@
 import traceback
 import warnings as w
+
+import numpy as np
 import pandas as pd
-from typing import List, Union
+from typing import List, Union, Optional
 
 import constants as cnst
 import Utils.array_utils as arr_utils
@@ -25,7 +27,7 @@ def create_gaze_events(gaze_data: pd.DataFrame, candidates: List[GazeEventTypeEn
         event_type: GazeEventTypeEnum = candidates[chunk_idxs[0]]
         try:
             chunk_data = gaze_data.iloc[chunk_idxs]
-            event = _create_event(event_data=chunk_data, event_type=event_type,
+            event = _create_event(event_type=event_type, event_data=chunk_data,
                                   viewer_distance=viewer_distance, eye=eye)
             events.append(event)
         except Exception as e:
@@ -38,23 +40,35 @@ def create_gaze_events(gaze_data: pd.DataFrame, candidates: List[GazeEventTypeEn
     return events
 
 
-def _create_event(event_data: pd.DataFrame, event_type: GazeEventTypeEnum,
+def _create_event(event_type: GazeEventTypeEnum, event_data: pd.DataFrame,
                   viewer_distance: float, eye: str) -> Union[
         None, BlinkEvent, SaccadeEvent, FixationEvent]:
-    """ Creates a single gaze event from the given event data. """
+    """
+    Creates a single gaze event from the given `event_data`, assuming it has the predefined column names from the
+    Config.experiment_config module. This is True for all datasets that were parsed using a DataParser class.
+    """
+    x_name = cnst.LEFT_X if eye == "left" else cnst.RIGHT_X
+    y_name = cnst.LEFT_Y if eye == "left" else cnst.RIGHT_Y
+    pupil_name = cnst.LEFT_PUPIL if eye == "left" else cnst.RIGHT_PUPIL
+    return _create_event_raw(event_type=event_type,
+                             t=event_data[cnst.MILLISECONDS].values,
+                             x=event_data[x_name].values,
+                             y=event_data[y_name].values,
+                             pupil=event_data[pupil_name].values,
+                             viewer_distance=viewer_distance)
+
+
+def _create_event_raw(event_type: GazeEventTypeEnum, t: np.ndarray,
+                      x: Optional[np.ndarray] = None, y: Optional[np.ndarray] = None,
+                      pupil: Optional[np.ndarray] = None, viewer_distance: Optional[float] = None
+                      ) -> Union[None, BlinkEvent, SaccadeEvent, FixationEvent]:
+    """ Creates a single gaze event from the given event data. No assumptions are made about the data. """
     if event_type == GazeEventTypeEnum.UNDEFINED:
         return None
     if event_type == GazeEventTypeEnum.FIXATION:
-        return FixationEvent(timestamps=event_data[cnst.MILLISECONDS].values,
-                             x=event_data[f"{eye}_x"].values,
-                             y=event_data[f"{eye}_y"].values,
-                             pupil=event_data[f"{eye}_{cnst.PUPIL}"].values,
-                             viewer_distance=viewer_distance)
+        return FixationEvent(timestamps=t, x=x, y=y, pupil=pupil, viewer_distance=viewer_distance)
     if event_type == GazeEventTypeEnum.SACCADE:
-        return SaccadeEvent(timestamps=event_data[cnst.MILLISECONDS].values,
-                            x=event_data[f"{eye}_x"].values,
-                            y=event_data[f"{eye}_y"].values,
-                            viewer_distance=viewer_distance)
+        return SaccadeEvent(timestamps=t, x=x, y=y, viewer_distance=viewer_distance)
     if event_type == GazeEventTypeEnum.BLINK:
-        return BlinkEvent(timestamps=event_data[cnst.MILLISECONDS].values)
+        return BlinkEvent(timestamps=t)
     raise ValueError(f"Unknown event type: {event_type}")
