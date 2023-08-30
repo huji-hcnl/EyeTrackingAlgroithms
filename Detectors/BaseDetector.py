@@ -26,9 +26,9 @@ class BaseDetector(ABC):
     _MINIMUM_TIME_WITHIN_EVENT: float = 5  # min duration of single event (in milliseconds)
     _MINIMUM_TIME_BETWEEN_IDENTICAL_EVENTS: float = 5  # min duration between identical events (in milliseconds)
 
-    def __init__(self, sr: float, missing_value: float = _MISSING_VALUE):
-        self._sr = sr  # sampling rate in Hz
+    def __init__(self, missing_value: float = _MISSING_VALUE):
         self._missing_value = missing_value
+        self._sr = np.nan  # sampling rate in Hz
 
     @final
     def detect_candidates_monocular(self, t: np.ndarray, x: np.ndarray, y: np.ndarray,
@@ -54,6 +54,7 @@ class BaseDetector(ABC):
         candidates = np.full_like(x, GazeEventTypeEnum.UNDEFINED)
         try:
             t, x, y = self._verify_inputs(t, x, y)
+            self._sr = self._calculate_sampling_rate(t)
             x, y, candidates = self._identify_blink_candidates(x, y, candidates, expand_blink_by_ms)
             candidates = self._identify_gaze_event_candidates(x, y, candidates)
             candidates = self._set_short_chunks_as_undefined(candidates)
@@ -235,18 +236,16 @@ class BaseDetector(ABC):
         return arr_copy
 
     @final
-    def _minimum_samples_within_event(self, ms: np.ndarray) -> int:
+    def _minimum_samples_within_event(self) -> int:
         """
         Calculates the minimum number of samples within a single event
-        :param ms: timestamps in milliseconds (floating-point, not integer)
         """
         return round(self._MINIMUM_TIME_WITHIN_EVENT * self._sr / 1000)
 
     @final
-    def _minimum_samples_between_identical_events(self, ms: np.ndarray) -> int:
+    def _minimum_samples_between_identical_events(self) -> int:
         """
         Calculates the minimum number of samples between identical events
-        :param ms: timestamps in milliseconds (floating-point, not integer)
         """
         return round(self._MINIMUM_TIME_BETWEEN_IDENTICAL_EVENTS * self._sr / 1000)
 
@@ -259,7 +258,10 @@ class BaseDetector(ABC):
         """
         if len(ms) < 2:
             raise ValueError("timestamps must be of length at least 2")
-        return cnst.MILLISECONDS_PER_SECOND / np.median(np.diff(ms))
+        sr = cnst.MILLISECONDS_PER_SECOND / np.median(np.diff(ms))
+        if not np.isfinite(sr):
+            raise RuntimeError("Error calculating sampling rate")
+        return sr
 
     def _is_missing_value(self, value: float) -> bool:
         if np.isnan(self._missing_value):
