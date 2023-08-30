@@ -1,4 +1,3 @@
-from typing import List
 import numpy as np
 from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
 from Detectors.BaseDetector import BaseDetector
@@ -20,7 +19,7 @@ class IDTDetector(BaseDetector):
         # Hertz to ms
         self._window_dim = int((sr / 1000) * window_duration)
 
-    def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray, candidates: np.ndarray) -> List[GazeEventTypeEnum]:
+    def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray, candidates: np.ndarray) -> np.ndarray:
         num_samples = len(x)
         candidates_copy = np.asarray(candidates, dtype=GazeEventTypeEnum).copy()
 
@@ -60,7 +59,7 @@ class IDTDetector(BaseDetector):
         else:
             candidates_copy[window_start_idx: window_end_idx] = GazeEventTypeEnum.SACCADE
 
-        return list(candidates_copy)
+        return candidates_copy
 
     @staticmethod
     def _calculate_dispersion(x, y, window_start: int, window_end: int):

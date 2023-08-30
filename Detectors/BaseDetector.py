@@ -117,7 +117,7 @@ class BaseDetector(ABC):
 
     @final
     def _identify_blink_candidates(self, x: np.ndarray, y: np.ndarray,
-                                   candidates: np.ndarray) -> Tuple[np.ndarray, np.ndarray, List[GazeEventTypeEnum]]:
+                                   candidates: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Identifies blink candidates in the given gaze data:
         1. Marks samples with missing gaze data (i.e. x or y is NaN) as blink candidates
@@ -134,7 +134,7 @@ class BaseDetector(ABC):
 
         :return: modified x and y coordinates, and a list of event candidates including where the blinks were detected
         """
-        candidates_copy = np.asarray(candidates).copy()
+        candidates_copy = np.asarray(candidates, dtype=GazeEventTypeEnum).copy()
         x_missing = np.array([self._is_missing_value(val) for val in x])
         y_missing = np.array([self._is_missing_value(val) for val in y])
         candidates_copy[x_missing | y_missing] = GazeEventTypeEnum.BLINK
@@ -147,10 +147,10 @@ class BaseDetector(ABC):
 
         x[candidates_copy == GazeEventTypeEnum.BLINK] = np.nan
         y[candidates_copy == GazeEventTypeEnum.BLINK] = np.nan
-        return x, y, list(candidates_copy)
+        return x, y, candidates_copy
 
     @abstractmethod
-    def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray, candidates: np.ndarray) -> List[GazeEventTypeEnum]:
+    def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray, candidates: np.ndarray) -> np.ndarray:
         """
         Identifies gaze-event (fixations, saccades, etc.) candidates in the given gaze data from a single eye
         """
