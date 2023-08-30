@@ -51,7 +51,7 @@ class BaseDetector(ABC):
         candidates = self._identify_gaze_event_candidates(x, y, candidates)
         candidates = self._set_short_chunks_as_undefined(candidates)
         candidates = self._merge_proximal_chunks_of_identical_values(candidates)
-        return candidates
+        return list(candidates)
 
     @final
     def detect_candidates_binocular(self,
@@ -150,21 +150,21 @@ class BaseDetector(ABC):
         raise NotImplementedError
 
     @final
-    def _set_short_chunks_as_undefined(self, arr) -> List[GazeEventTypeEnum]:
+    def _set_short_chunks_as_undefined(self, arr) -> np.ndarray:
         """
         If a "chunk" of identical values is shorter than `self._minimum_samples_within_event`, we fill the indices of
         said chunk with value GazeEventTypeEnum.UNDEFINED.
         """
-        arr_copy = np.copy(arr)
+        arr_copy = np.asarray(arr).copy()
         chunk_indices = arr_utils.get_chunk_indices(arr)
         for chunk_idx in chunk_indices:
             if len(chunk_idx) < self._minimum_samples_within_event:
                 arr_copy[chunk_idx] = GazeEventTypeEnum.UNDEFINED
-        return list(arr_copy)
+        return arr_copy
 
     @final
     def _merge_proximal_chunks_of_identical_values(self, arr,
-                                                   allow_short_chunks_of: Set = None) -> List[GazeEventTypeEnum]:
+                                                   allow_short_chunks_of: Set = None) -> np.ndarray:
         """
         If two "chunks" of identical values are separated by a short "chunk" of other values, merges the two chunks into
         one chunk by filling the middle chunk with the value of the left chunk.
@@ -195,7 +195,7 @@ class BaseDetector(ABC):
             # reached here if the middle chunk is short, its value is not allowed to be short, and left and right chunks
             # are identical. merge the left and right chunks by filling `middle_chunk` with the value of `left_chunk`.
             arr_copy[middle_chunk] = left_chunk_value
-        return arr_copy.tolist()
+        return arr_copy
 
     @property
     @final
