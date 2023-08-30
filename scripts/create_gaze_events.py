@@ -16,7 +16,10 @@ from GazeEvents.FixationEvent import FixationEvent
 def create_gaze_events(gaze_data: pd.DataFrame, candidates: List[GazeEventTypeEnum],
                        viewer_distance: float, eye: str
                        ) -> List[Union[BlinkEvent, SaccadeEvent, FixationEvent]]:
-    """ Creates a list of gaze events from the given gaze data, based on the given candidates """
+    """
+    Creates a list of gaze events from the given gaze data, based on the given candidates.
+    This function assumes that the gaze data has the predefined column names from the Config.experiment_config module.
+    """
     eye = eye.lower()
     if eye not in ["left", "right"]:
         raise ValueError(f"Invalid eye: {eye}")
