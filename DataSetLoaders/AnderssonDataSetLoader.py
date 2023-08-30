@@ -21,14 +21,14 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
     _ARTICLE: str = "https://link.springer.com/article/10.3758/s13428-016-0738-9"
 
     __STIMULUS_NAME = f"{cnst.STIMULUS}_name"
-    __RATER_NAME = "rater_name"
+    __RATER = "rater"
     __PIXEL_SIZE_CM = "pixel_size_cm"
     __VIEWER_DISTANCE_CM = "viewer_distance_cm"
 
     @classmethod
     def columns(cls) -> List[str]:
         return [cnst.SUBJECT_ID, cls.__VIEWER_DISTANCE_CM, cnst.STIMULUS, cls.__STIMULUS_NAME, cls.__PIXEL_SIZE_CM,
-                cls.__RATER_NAME, cnst.MILLISECONDS, cnst.RIGHT_X, cnst.RIGHT_Y, cnst.EVENT_TYPE]
+                cls.__RATER, cnst.MILLISECONDS, cnst.RIGHT_X, cnst.RIGHT_Y, cnst.EVENT_TYPE]
 
     @classmethod
     def _parse_response(cls, response: req.Response) -> pd.DataFrame:
@@ -65,7 +65,7 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
         gaze_data[cnst.SUBJECT_ID] = subject_id
         gaze_data[cnst.STIMULUS] = stimulus_type
         gaze_data[cls.__STIMULUS_NAME] = stimulus_name
-        gaze_data[cls.__RATER_NAME] = rater
+        gaze_data[cls.__RATER] = rater
         return gaze_data
 
     @staticmethod
