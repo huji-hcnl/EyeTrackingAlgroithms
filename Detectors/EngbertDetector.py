@@ -26,10 +26,11 @@ class EngbertDetector(BaseDetector):
     _LAMBDA_NOISE_THRESHOLD = 5  # default value used in the original paper
     _DERIVATION_WINDOW_SIZE = 2  # default value used in the original paper
 
-    def __init__(self, sr: float,
+    def __init__(self,
+                 missing_value: float = BaseDetector._MISSING_VALUE,
                  lambda_noise_threshold: float = _LAMBDA_NOISE_THRESHOLD,
                  derivation_window_size: int = _DERIVATION_WINDOW_SIZE):
-        super().__init__(sr)
+        super().__init__(missing_value)
         if lambda_noise_threshold <= 0:
             raise ValueError("lambda_noise_threshold must be positive")
         if derivation_window_size <= 0:
@@ -62,8 +63,8 @@ class EngbertDetector(BaseDetector):
         median_std = self._median_standard_deviation(velocities)
         return self._lambda_noise_threshold * median_std
 
-    def _verify_inputs(self, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        x, y = super()._verify_inputs(x, y)
+    def _verify_inputs(self, t: np.ndarray, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        t, x, y = super()._verify_inputs(t, x, y)
         if len(x) < 2 * self._derivation_window_size:
             raise ValueError(
                 f"x and y must be of length at least 2 * derivation_window_size (={2 * self._derivation_window_size})")

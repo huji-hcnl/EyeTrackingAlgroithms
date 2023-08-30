@@ -10,7 +10,8 @@ class TestBaseDetector(unittest.TestCase):
     _LAMBDA = 5
     _WS = 2
 
-    DETECTOR = EngbertDetector(sr=500, lambda_noise_threshold=_LAMBDA, derivation_window_size=_WS)
+    DETECTOR = EngbertDetector(lambda_noise_threshold=_LAMBDA, derivation_window_size=_WS)
+    DETECTOR._sr = _SR
 
     def test_set_short_chunks_as_undefined(self):
         arr = np.array([])

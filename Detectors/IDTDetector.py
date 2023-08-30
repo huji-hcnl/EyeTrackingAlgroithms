@@ -9,23 +9,24 @@ class IDTDetector(BaseDetector):
     __DEFAULT_DISPERSION_THRESHOLD_ANGLE = 0.5  # degrees
     __DEFAULT_WINDOW_DURATION = 100  # ms- size of the duration time window = minimum allowed fixation duration
 
-    def __init__(self, sr: float, viewer_distance: float, pixel_size: float,
+    def __init__(self, viewer_distance: float, pixel_size: float,
+                 missing_value: float = BaseDetector._MISSING_VALUE,
                  dispersion_threshold: float = __DEFAULT_DISPERSION_THRESHOLD_ANGLE,
                  window_duration: int = __DEFAULT_WINDOW_DURATION):
-        super().__init__(sr=sr)
+        super().__init__(missing_value)
         # visual angle to pixels
         self._dispersion_threshold_pixels = visual_angle_utils.visual_angle_to_pixels(dispersion_threshold,
                                                                                       viewer_distance, pixel_size)
-        # Hertz to ms
-        self._window_dim = int((sr / 1000) * window_duration)
+        self._window_duration = window_duration  # in ms
 
     def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray, candidates: np.ndarray) -> np.ndarray:
         num_samples = len(x)
         candidates_copy = np.asarray(candidates, dtype=GazeEventTypeEnum).copy()
 
         # initialize a window in the minimum size for fixation
+        window_size = round(self._window_duration * self._sr / 1000)
         window_start_idx = 0
-        window_end_idx = self._window_dim - 1
+        window_end_idx = window_size - 1
         # if the window is not in minimum size for fixation- the samples are saccades
         if window_end_idx >= num_samples:
             raise ValueError("window size cannot be larger than number of samples")
@@ -43,7 +44,7 @@ class IDTDetector(BaseDetector):
             elif fixation_flag:
                 candidates_copy[window_start_idx: window_end_idx] = GazeEventTypeEnum.FIXATION
                 window_start_idx = window_end_idx
-                window_end_idx = window_start_idx + self._window_dim - 1
+                window_end_idx = window_start_idx + window_size - 1
                 fixation_flag = False
             # when exceeding the dispersion threshold in a new window: label current sample as saccade
             # and start new window in the next sample
