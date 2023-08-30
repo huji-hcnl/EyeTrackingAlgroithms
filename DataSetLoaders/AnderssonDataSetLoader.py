@@ -15,6 +15,11 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
     Loads the dataset presented in the article:
     Andersson, R., Larsson, L., Holmqvist, K., Stridh, M., & Nyström, M. (2017): One algorithm to rule them all? An
     evaluation and discussion of ten eye movement event-detection algorithms. Behavior Research Methods, 49(2), 616-637.
+
+    Note that there was an error in the original dataset, which was corrected in a later article:
+    Zemblys, R., Niehorster, D. C., Komogortsev, O., & Holmqvist, K. (2018). Using machine learning to detect events in
+    eye-tracking data. Behavior Research Methods, 50(1), 160–181.
+    See their implementation: https://github.com/r-zemblys/EM-event-detection-evaluation/blob/main/misc/data_parsers/lund2013.py
     """
 
     _URL: str = "http://www.kasprowski.pl/datasets/events.zip"
