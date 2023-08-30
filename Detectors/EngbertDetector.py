@@ -1,5 +1,6 @@
 import numpy as np
 from typing import Tuple
+from overrides import override
 
 import constants as cnst
 from Detectors.BaseDetector import BaseDetector
@@ -36,18 +37,7 @@ class EngbertDetector(BaseDetector):
         self._lambda_noise_threshold = lambda_noise_threshold
         self._derivation_window_size = round(derivation_window_size)
 
-    def calculate_velocity_threshold(self, arr: np.ndarray) -> float:
-        """
-        Calculates the velocity threshold along a single axis, based on the algorithm described in the original paper:
-        1. Calculate the velocities along the axis
-        2. Calculate the median-standard-deviation of the velocities
-        3. Calculate the noise threshold as the multiple of the median-standard-deviation with the constant
-            `self.lambda_noise_threshold`
-        """
-        velocities = self._calculate_axial_velocity(arr)
-        median_std = self._median_standard_deviation(velocities)
-        return self._lambda_noise_threshold * median_std
-
+    @override
     def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray, candidates: np.ndarray) -> np.ndarray:
         x_velocity = self._calculate_axial_velocity(x)
         thresh_x = self.calculate_velocity_threshold(x)
@@ -59,6 +49,18 @@ class EngbertDetector(BaseDetector):
         candidates_copy[ellipse < 1] = GazeEventTypeEnum.FIXATION
         candidates_copy[ellipse >= 1] = GazeEventTypeEnum.SACCADE
         return candidates_copy
+
+    def calculate_velocity_threshold(self, arr: np.ndarray) -> float:
+        """
+        Calculates the velocity threshold along a single axis, based on the algorithm described in the original paper:
+        1. Calculate the velocities along the axis
+        2. Calculate the median-standard-deviation of the velocities
+        3. Calculate the noise threshold as the multiple of the median-standard-deviation with the constant
+            `self.lambda_noise_threshold`
+        """
+        velocities = self._calculate_axial_velocity(arr)
+        median_std = self._median_standard_deviation(velocities)
+        return self._lambda_noise_threshold * median_std
 
     def _verify_inputs(self, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         x, y = super()._verify_inputs(x, y)
