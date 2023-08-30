@@ -54,8 +54,9 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
         """
         x_missing = df[cnst.RIGHT_X] == 0
         y_missing = df[cnst.RIGHT_Y] == 0
-        df[cnst.RIGHT_X][x_missing & y_missing] = np.nan
-        df[cnst.RIGHT_Y][x_missing & y_missing] = np.nan
+        missing_idxs = np.where(x_missing & y_missing)[0]
+        col_idxs = df.columns.get_indexer([cnst.RIGHT_X, cnst.RIGHT_Y])
+        df.iloc[missing_idxs, col_idxs] = np.nan
         return df
 
     @classmethod
