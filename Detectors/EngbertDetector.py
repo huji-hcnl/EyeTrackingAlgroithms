@@ -1,8 +1,10 @@
 import numpy as np
-from typing import List, Tuple
+from typing import Tuple
+from overrides import override
 
+import constants as cnst
 from Detectors.BaseDetector import BaseDetector
-from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
+from Config.GazeEventTypeEnum import GazeEventTypeEnum
 
 
 class EngbertDetector(BaseDetector):
@@ -35,21 +37,30 @@ class EngbertDetector(BaseDetector):
         self._lambda_noise_threshold = lambda_noise_threshold
         self._derivation_window_size = round(derivation_window_size)
 
-    def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray,
-                                        candidates: List[GazeEventTypeEnum]) -> List[GazeEventTypeEnum]:
+    @override
+    def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray, candidates: np.ndarray) -> np.ndarray:
         x_velocity = self._calculate_axial_velocity(x)
-        x_std = self._median_standard_deviation(x_velocity)
-        x_noise_threshold = self._lambda_noise_threshold * x_std
-
+        thresh_x = self.calculate_velocity_threshold(x)
         y_velocity = self._calculate_axial_velocity(y)
-        y_std = self._median_standard_deviation(y_velocity)
-        y_noise_threshold = self._lambda_noise_threshold * y_std
+        thresh_y = self.calculate_velocity_threshold(y)
 
-        ellipse = (x_velocity / x_noise_threshold) ** 2 + (y_velocity / y_noise_threshold) ** 2
-        candidates_array = np.array(candidates)
-        candidates_array[ellipse < 1] = GazeEventTypeEnum.FIXATION
-        candidates_array[ellipse >= 1] = GazeEventTypeEnum.SACCADE
-        return list(candidates_array)
+        ellipse = (x_velocity / thresh_x) ** 2 + (y_velocity / thresh_y) ** 2
+        candidates_copy = np.asarray(candidates, dtype=GazeEventTypeEnum).copy()
+        candidates_copy[ellipse < 1] = GazeEventTypeEnum.FIXATION
+        candidates_copy[ellipse >= 1] = GazeEventTypeEnum.SACCADE
+        return candidates_copy
+
+    def calculate_velocity_threshold(self, arr: np.ndarray) -> float:
+        """
+        Calculates the velocity threshold along a single axis, based on the algorithm described in the original paper:
+        1. Calculate the velocities along the axis
+        2. Calculate the median-standard-deviation of the velocities
+        3. Calculate the noise threshold as the multiple of the median-standard-deviation with the constant
+            `self.lambda_noise_threshold`
+        """
+        velocities = self._calculate_axial_velocity(arr)
+        median_std = self._median_standard_deviation(velocities)
+        return self._lambda_noise_threshold * median_std
 
     def _verify_inputs(self, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         x, y = super()._verify_inputs(x, y)
@@ -89,7 +100,7 @@ class EngbertDetector(BaseDetector):
         squared_median = np.power(np.nanmedian(arr), 2)
         median_of_squares = np.nanmedian(np.power(arr, 2))
         sd = np.sqrt(median_of_squares - squared_median)
-        return float(np.nanmax([sd, 1e-6]))
+        return float(np.nanmax([sd, cnst.EPSILON]))
 
 
 

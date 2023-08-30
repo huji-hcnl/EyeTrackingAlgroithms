@@ -1,7 +1,7 @@
 import pandas as pd
 import requests as req
 from abc import ABCMeta, abstractmethod
-from typing import List
+from typing import List, final
 
 
 class BaseDataSetLoader(ABCMeta):
@@ -9,17 +9,18 @@ class BaseDataSetLoader(ABCMeta):
     _ARTICLE: str = None
 
     @classmethod
+    @final
     def from_remote(cls) -> pd.DataFrame:
         """ Loads the dataset from a remote URL, parses it and returns a DataFrame. """
         response = req.get(cls._URL)
         if response.status_code != 200:
             raise RuntimeError(f"Failed to download dataset from {cls._URL}")
         df = cls._parse_response(response)
-        df = cls._replace_missing_values(df)
         df = df[cls.columns()]  # reorder columns
         return df
 
     @classmethod
+    @final
     def save_to_pickle(cls, df: pd.DataFrame, path_file: str = None) -> None:
         if path_file is None:
             path_file = f"{cls.__name__}.pkl"
@@ -28,10 +29,12 @@ class BaseDataSetLoader(ABCMeta):
         df.to_pickle(path_file)
 
     @classmethod
+    @final
     def url(cls) -> str:
         return cls._URL
 
     @classmethod
+    @final
     def article(cls) -> str:
         return cls._ARTICLE
 
@@ -43,11 +46,6 @@ class BaseDataSetLoader(ABCMeta):
     @classmethod
     @abstractmethod
     def _parse_response(cls, response: req.Response) -> pd.DataFrame:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def _replace_missing_values(cls, df: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError
 
     def __init_subclass__(cls, **kwargs):

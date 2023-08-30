@@ -3,7 +3,7 @@ import pandas as pd
 from typing import Tuple
 
 from GazeEvents.BaseGazeEvent import BaseGazeEvent
-from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
+from Config.GazeEventTypeEnum import GazeEventTypeEnum
 
 
 class FixationEvent(BaseGazeEvent):
