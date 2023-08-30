@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Tuple
 
+import constants as cnst
 from Detectors.BaseDetector import BaseDetector
 from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
 
@@ -88,7 +89,7 @@ class EngbertDetector(BaseDetector):
         squared_median = np.power(np.nanmedian(arr), 2)
         median_of_squares = np.nanmedian(np.power(arr, 2))
         sd = np.sqrt(median_of_squares - squared_median)
-        return float(np.nanmax([sd, 1e-6]))
+        return float(np.nanmax([sd, cnst.EPSILON]))
 
 
 

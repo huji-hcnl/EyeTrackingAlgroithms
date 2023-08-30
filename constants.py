@@ -1,6 +1,7 @@
 """
 List of all the constants used as field names, column names, etc.
 """
+EPSILON = 1e-8
 
 MILLISECONDS_PER_SECOND = 1000
 MICROSECONDS_PER_MILLISECOND = 1000

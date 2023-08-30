@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 
+import constants as cnst
 from Detectors.EngbertDetector import EngbertDetector
 
 
@@ -44,10 +45,10 @@ class TestEngbertDetector(unittest.TestCase):
 
     def test_median_standard_deviation(self):
         arr = np.zeros(10)
-        self.assertEqual(self.DETECTOR._median_standard_deviation(arr), 1e-6)
+        self.assertEqual(self.DETECTOR._median_standard_deviation(arr), cnst.EPSILON)
 
         arr = np.arange(11).astype(float)
-        self.assertEqual(self.DETECTOR._median_standard_deviation(arr), 1e-6)
+        self.assertEqual(self.DETECTOR._median_standard_deviation(arr), cnst.EPSILON)
 
         arr[0] = np.nan
         self.assertEqual(self.DETECTOR._median_standard_deviation(arr), 0.5)
