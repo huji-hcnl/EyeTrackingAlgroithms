@@ -4,7 +4,7 @@ from overrides import override
 
 import constants as cnst
 from Detectors.BaseDetector import BaseDetector
-from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
+from Config.GazeEventTypeEnum import GazeEventTypeEnum
 
 
 class EngbertDetector(BaseDetector):

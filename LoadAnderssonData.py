@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import requests as requests
 from scipy.io import loadmat
-from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
+from Config.GazeEventTypeEnum import GazeEventTypeEnum
 
 
 # Loads the dataset from article: Andersson, R. et. al (2017): "One algorithm to rule them all? An evaluation and

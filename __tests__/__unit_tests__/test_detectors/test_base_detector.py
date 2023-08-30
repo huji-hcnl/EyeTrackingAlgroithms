@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 
 from Detectors.EngbertDetector import EngbertDetector
-from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
+from Config.GazeEventTypeEnum import GazeEventTypeEnum
 
 
 class TestBaseDetector(unittest.TestCase):

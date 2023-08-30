@@ -107,7 +107,7 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
         sampling_rate = eyetracking_data_dict['sampFreq'][0, 0]
 
         # extract gaze data:
-        from GazeEvents.GazeEventTypeEnum import get_event_type
+        from Config.GazeEventTypeEnum import get_event_type
         samples_data = eyetracking_data_dict['pos']
         right_x, right_y = samples_data[:, 3:5].T
         timestamps = AnderssonDataSetLoader.__calculate_timestamps(samples_data[:, 0], sampling_rate)

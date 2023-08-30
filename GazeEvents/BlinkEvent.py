@@ -1,5 +1,5 @@
 from GazeEvents.BaseEvent import BaseEvent
-from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
+from Config.GazeEventTypeEnum import GazeEventTypeEnum
 
 
 class BlinkEvent(BaseEvent):

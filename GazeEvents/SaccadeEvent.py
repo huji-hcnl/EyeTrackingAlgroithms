@@ -6,7 +6,7 @@ import Config.experiment_config as cnfg
 import Utils.pixel_utils as pixel_utils
 import Utils.visual_angle_utils as visang_utils
 from GazeEvents.BaseGazeEvent import BaseGazeEvent
-from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
+from Config.GazeEventTypeEnum import GazeEventTypeEnum
 
 
 class SaccadeEvent(BaseGazeEvent):

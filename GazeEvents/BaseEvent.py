@@ -4,7 +4,7 @@ from abc import ABC
 from typing import List, final
 
 import constants as cnst
-from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
+from Config.GazeEventTypeEnum import GazeEventTypeEnum
 
 
 class BaseEvent(ABC):

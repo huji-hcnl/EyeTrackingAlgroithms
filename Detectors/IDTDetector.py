@@ -1,5 +1,5 @@
 import numpy as np
-from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
+from Config.GazeEventTypeEnum import GazeEventTypeEnum
 from Detectors.BaseDetector import BaseDetector
 from Utils import visual_angle_utils
 

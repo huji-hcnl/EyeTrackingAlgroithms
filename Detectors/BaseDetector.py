@@ -4,7 +4,7 @@ from typing import final, List, Tuple, Set
 
 import constants as cnst
 import Utils.array_utils as arr_utils
-from GazeEvents.GazeEventTypeEnum import GazeEventTypeEnum
+from Config.GazeEventTypeEnum import GazeEventTypeEnum
 
 
 class BaseDetector(ABC):
