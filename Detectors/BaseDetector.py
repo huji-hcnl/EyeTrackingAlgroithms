@@ -142,9 +142,11 @@ class BaseDetector(ABC):
         candidates_copy = self._merge_proximal_chunks_of_identical_values(candidates_copy)
         # TODO: add blink correction before/after NaNs
 
-        x[candidates_copy == GazeEventTypeEnum.BLINK] = np.nan
-        y[candidates_copy == GazeEventTypeEnum.BLINK] = np.nan
-        return x, y, candidates_copy
+        x_copy = x.copy()
+        y_copy = y.copy()
+        x_copy[candidates_copy == GazeEventTypeEnum.BLINK] = np.nan
+        y_copy[candidates_copy == GazeEventTypeEnum.BLINK] = np.nan
+        return x_copy, y_copy, candidates_copy
 
     @abstractmethod
     def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray, candidates: np.ndarray) -> np.ndarray:
