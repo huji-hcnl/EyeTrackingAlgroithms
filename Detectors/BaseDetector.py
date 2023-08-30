@@ -234,21 +234,25 @@ class BaseDetector(ABC):
             arr_copy[middle_chunk] = left_chunk_value
         return arr_copy
 
+    @classmethod
     @final
-    def _minimum_samples_within_event(self, ms: np.ndarray) -> int:
+    def _minimum_samples_within_event(cls, ms: np.ndarray) -> int:
         """
         Calculates the minimum number of samples within a single event
         :param ms: timestamps in milliseconds (floating-point, not integer)
         """
-        return round(self._MINIMUM_TIME_WITHIN_EVENT * self._sr / 1000)
+        sr = cls._calculate_sampling_rate(ms)
+        return round(cls._MINIMUM_TIME_WITHIN_EVENT * sr / 1000)
 
+    @classmethod
     @final
-    def _minimum_samples_between_identical_events(self, ms: np.ndarray) -> int:
+    def _minimum_samples_between_identical_events(cls, ms: np.ndarray) -> int:
         """
         Calculates the minimum number of samples between identical events
         :param ms: timestamps in milliseconds (floating-point, not integer)
         """
-        return round(self._MINIMUM_TIME_BETWEEN_IDENTICAL_EVENTS * self._sr / 1000)
+        sr = cls._calculate_sampling_rate(ms)
+        return round(cls._MINIMUM_TIME_BETWEEN_IDENTICAL_EVENTS * sr / 1000)
 
     @staticmethod
     @final
