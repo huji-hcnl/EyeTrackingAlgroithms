@@ -114,13 +114,26 @@ class BaseDetector(ABC):
     @final
     def _identify_blink_candidates(self, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray, List[GazeEventTypeEnum]]:
         """
-        Identifies blink candidates in the given gaze data from a single eye, and removes them from the gaze data.
-        Returns the modified gaze data and a list of event candidates including where the blinks were detected.
+        Identifies blink candidates in the given gaze data:
+        1. Marks samples with missing gaze data (i.e. x or y is NaN) as blink candidates
+        2. Ignores blink candidates that are too short (i.e. less than `self._minimum_samples_within_event` consecutive
+        samples).
+        3. Merges blink candidates that are close to each other (i.e. less than `self._minimum_samples_between_identical_events`
+        samples apart).
+        4. Modified the gaze data by setting the x and y coordinates of blink candidates to NaN.
+
+        :param x: x-coordinates of gaze data from a single eye
+        :param y: y-coordinates of gaze data from a single eye
+
+        :return: modified x and y coordinates, and a list of event candidates including where the blinks were detected
         """
         candidates = np.full_like(x, GazeEventTypeEnum.UNDEFINED)
         x_missing = np.array([self._is_missing_value(val) for val in x])
         y_missing = np.array([self._is_missing_value(val) for val in y])
         candidates[x_missing | y_missing] = GazeEventTypeEnum.BLINK
+        candidates = self._set_short_chunks_as_undefined(candidates)
+        candidates = self._merge_proximal_chunks_of_identical_values(candidates,
+                                                                     allow_short_chunks_of={GazeEventTypeEnum.UNDEFINED})
 
         # TODO: add blink correction before/after NaNs
 
