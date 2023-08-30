@@ -139,10 +139,7 @@ class BaseDetector(ABC):
         y_missing = np.array([self._is_missing_value(val) for val in y])
         candidates_copy[x_missing | y_missing] = GazeEventTypeEnum.BLINK
         candidates_copy = self._set_short_chunks_as_undefined(candidates_copy)
-        candidates_copy = self._merge_proximal_chunks_of_identical_values(candidates_copy,
-                                                                          allow_short_chunks_of={
-                                                                              GazeEventTypeEnum.UNDEFINED})
-
+        candidates_copy = self._merge_proximal_chunks_of_identical_values(candidates_copy)
         # TODO: add blink correction before/after NaNs
 
         x[candidates_copy == GazeEventTypeEnum.BLINK] = np.nan
