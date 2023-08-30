@@ -43,14 +43,11 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
             mat_file = zip_file.open(filename)
             df = cls.__read_mat_file(mat_file)
             dataframes.append(df)
+        # create a unified dataframe:
         df = pd.concat(dataframes, ignore_index=True, axis=0)
-        return df
 
-    @classmethod
-    def _replace_missing_values(cls, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        This dataset marks missing values as samples with X,Y coordinates of (0,0). We replace these values with NaNs.
-        """
+        # replace missing samples with NaNs:
+        # this dataset marks missing samples with (0, 0) coordinates, instead of NaNs.
         x_missing = df[cnst.RIGHT_X] == 0
         y_missing = df[cnst.RIGHT_Y] == 0
         missing_idxs = np.where(x_missing & y_missing)[0]

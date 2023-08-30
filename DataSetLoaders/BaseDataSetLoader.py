@@ -16,7 +16,6 @@ class BaseDataSetLoader(ABCMeta):
         if response.status_code != 200:
             raise RuntimeError(f"Failed to download dataset from {cls._URL}")
         df = cls._parse_response(response)
-        df = cls._replace_missing_values(df)
         df = df[cls.columns()]  # reorder columns
         return df
 
@@ -47,11 +46,6 @@ class BaseDataSetLoader(ABCMeta):
     @classmethod
     @abstractmethod
     def _parse_response(cls, response: req.Response) -> pd.DataFrame:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def _replace_missing_values(cls, df: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError
 
     def __init_subclass__(cls, **kwargs):
