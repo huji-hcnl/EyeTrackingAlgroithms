@@ -1,3 +1,4 @@
+import traceback
 import warnings as w
 import pandas as pd
 from typing import List, Union
@@ -28,7 +29,8 @@ def create_gaze_events(gaze_data: pd.DataFrame, candidates: List[GazeEventTypeEn
                                   viewer_distance=viewer_distance, eye=eye)
             events.append(event)
         except Exception as e:
-            w.warn(f"Error when attempting to create a {event_type.name} event: {e}")
+            trace = traceback.format_exc()
+            w.warn(f"{type(e)} when attempting to create a {event_type.name} event: {trace}\n")
 
     # filter None events and sort by start-time
     events = [event for event in events if event is not None]
