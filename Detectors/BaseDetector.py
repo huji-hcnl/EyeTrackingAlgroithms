@@ -125,7 +125,7 @@ class BaseDetector(ABC):
         samples).
         3. Merges blink candidates that are close to each other (i.e. less than `self._minimum_samples_between_identical_events`
         samples apart).
-        4. Modified the gaze data by setting the x and y coordinates of blink candidates to NaN.
+        4. Modifies the gaze data by setting the x and y coordinates of blink candidates to NaN.
 
         :param x: x-coordinates of gaze data from a single eye
         :param y: y-coordinates of gaze data from a single eye
