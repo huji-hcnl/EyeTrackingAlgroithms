@@ -62,7 +62,7 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
     def __read_mat_file(cls, mat_file) -> pd.DataFrame:
         gaze_data = cls.__handle_mat_file_data(mat_file)
         subject_id, stimulus_type, stimulus_name, rater = cls.__handle_mat_file_name(mat_file.name)
-        gaze_data[cls.__SUBJECT_ID] = subject_id
+        gaze_data[cnst.SUBJECT_ID] = subject_id
         gaze_data[cnst.STIMULUS] = stimulus_type
         gaze_data[cls.__STIMULUS_NAME] = stimulus_name
         gaze_data[cls.__RATER_NAME] = rater
