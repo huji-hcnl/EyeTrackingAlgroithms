@@ -20,10 +20,9 @@ class IDTDetector(BaseDetector):
         # Hertz to ms
         self._window_dim = int((sr / 1000) * window_duration)
 
-    def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray,
-                                        candidates: List[GazeEventTypeEnum]) -> List[GazeEventTypeEnum]:
+    def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray, candidates: np.ndarray) -> List[GazeEventTypeEnum]:
         num_samples = len(x)
-        candidates_array = np.array(candidates)
+        candidates_copy = np.asarray(candidates, dtype=GazeEventTypeEnum).copy()
 
         # initialize a window in the minimum size for fixation
         window_start_idx = 0
@@ -43,25 +42,25 @@ class IDTDetector(BaseDetector):
             # when exceeding the dispersion threshold in a fixation window: label all samples in the window as fixation
             # and start new window in the end of the old one
             elif fixation_flag:
-                candidates_array[window_start_idx: window_end_idx] = GazeEventTypeEnum.FIXATION
+                candidates_copy[window_start_idx: window_end_idx] = GazeEventTypeEnum.FIXATION
                 window_start_idx = window_end_idx
                 window_end_idx = window_start_idx + self._window_dim - 1
                 fixation_flag = False
             # when exceeding the dispersion threshold in a new window: label current sample as saccade
             # and start new window in the next sample
             else:
-                candidates_array[window_start_idx] = GazeEventTypeEnum.SACCADE
+                candidates_copy[window_start_idx] = GazeEventTypeEnum.SACCADE
                 window_start_idx += 1
                 window_end_idx += 1
 
         # in case the last window is a fixation window
         if fixation_flag:
-            candidates_array[window_start_idx: window_end_idx] = GazeEventTypeEnum.FIXATION
+            candidates_copy[window_start_idx: window_end_idx] = GazeEventTypeEnum.FIXATION
         # in case last window is not a fixation window- all remaining samples will be saccades
         else:
-            candidates_array[window_start_idx: window_end_idx] = GazeEventTypeEnum.SACCADE
+            candidates_copy[window_start_idx: window_end_idx] = GazeEventTypeEnum.SACCADE
 
-        return list(candidates_array)
+        return list(candidates_copy)
 
     @staticmethod
     def _calculate_dispersion(x, y, window_start: int, window_end: int):

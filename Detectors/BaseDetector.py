@@ -150,8 +150,7 @@ class BaseDetector(ABC):
         return x, y, list(candidates_copy)
 
     @abstractmethod
-    def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray,
-                                        candidates: List[GazeEventTypeEnum]) -> List[GazeEventTypeEnum]:
+    def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray, candidates: np.ndarray) -> List[GazeEventTypeEnum]:
         """
         Identifies gaze-event (fixations, saccades, etc.) candidates in the given gaze data from a single eye
         """
