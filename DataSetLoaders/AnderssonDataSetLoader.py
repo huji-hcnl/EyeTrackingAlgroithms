@@ -28,7 +28,7 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
     @classmethod
     def columns(cls) -> List[str]:
         return [cnst.SUBJECT_ID, cls.__VIEWER_DISTANCE_CM, cnst.STIMULUS, cls.__STIMULUS_NAME, cls.__PIXEL_SIZE_CM,
-                cls.__RATER, cnst.MILLISECONDS, cnst.RIGHT_X, cnst.RIGHT_Y, cnst.EVENT_TYPE]
+                cls.__RATER, cnst.TRIAL, cnst.MILLISECONDS, cnst.RIGHT_X, cnst.RIGHT_Y, cnst.EVENT_TYPE]
 
     @classmethod
     def _parse_response(cls, response: req.Response) -> pd.DataFrame:
@@ -53,6 +53,15 @@ class AnderssonDataSetLoader(BaseDataSetLoader, ABC):
         missing_idxs = np.where(x_missing & y_missing)[0]
         col_idxs = df.columns.get_indexer([cnst.RIGHT_X, cnst.RIGHT_Y])
         df.iloc[missing_idxs, col_idxs] = np.nan
+
+        # add a column for trial number:
+        # trials are instances that share the same subject id, stimulus type and stimulus name.
+        trial_counter = 1
+        df[cnst.TRIAL] = np.nan
+        for _, trial_df in df.groupby([cnst.SUBJECT_ID, cnst.STIMULUS, cls.__STIMULUS_NAME]):
+            df.loc[trial_df.index, cnst.TRIAL] = trial_counter
+            trial_counter += 1
+        df[cnst.TRIAL] = df[cnst.TRIAL].astype(int)
         return df
 
     @classmethod
