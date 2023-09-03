@@ -19,6 +19,14 @@ class TestVisualAngleUtils(unittest.TestCase):
                                                                                       pixel_size=self.PS,
                                                                                       use_radians=False))
 
+    def test_pixels_to_visual_angle(self):
+        self.assertEqual(0, visang_utils.pixels_to_visual_angle(num_px=0, d=self.D, pixel_size=self.PS))
+        self.assertEqual(45, visang_utils.pixels_to_visual_angle(num_px=1, d=self.D, pixel_size=self.PS))
+        self.assertEqual(np.pi / 4, visang_utils.pixels_to_visual_angle(num_px=1, d=self.D, pixel_size=self.PS,
+                                                                        use_radians=True))
+        self.assertTrue(np.isnan(visang_utils.pixels_to_visual_angle(num_px=np.inf, d=self.D, pixel_size=self.PS)))
+        self.assertRaises(ValueError, visang_utils.pixels_to_visual_angle, num_px=-1, d=self.D, pixel_size=self.PS)
+
     def test_pixels_array_to_vis_angle_array(self):
         xs1 = np.zeros(5)
         ys = np.arange(5)

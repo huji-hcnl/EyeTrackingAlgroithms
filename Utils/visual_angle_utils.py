@@ -25,6 +25,35 @@ def visual_angle_to_pixels(deg: float, d: float, pixel_size: float) -> float:
     return edge_pixels
 
 
+def pixels_to_visual_angle(num_px: float, d: float, pixel_size: float, use_radians=False) -> float:
+    """
+    Calculates the visual angle that corresponds to `num_px` pixels, given that the viewer is sitting at a distance of
+    `d` centimeters from the screen, and that the size of each pixel is `pixel_size` centimeters.
+
+    See details on calculations in Kaiser, Peter K. "Calculation of Visual Angle". The Joy of Visual Perception: A Web Book:
+        http://www.yorku.ca/eye/visangle.htm
+
+    :param num_px: the number of pixels.
+    :param d: the distance (in cm) from the screen.
+    :param pixel_size: the size (of the diagonal) of a pixel (in cm).
+    :param use_radians: if True, returns the angle in radians. Otherwise, returns the angle in degrees.
+
+    :return: the visual angle (in degrees) that corresponds to the given number of pixels.
+        If `num_px` is not finite, returns np.nan.
+
+    :raises ValueError: if `num_px` is negative.
+    """
+    if not np.isfinite(num_px):
+        return np.nan
+    if num_px < 0:
+        raise ValueError("argument `num_px` must be a non-negative number")
+    cm_dist = num_px * pixel_size
+    angle = np.arctan(cm_dist / d)
+    if not use_radians:
+        angle = np.rad2deg(angle)
+    return angle
+
+
 def pixels_array_to_vis_angle_array(xs: np.ndarray, ys: np.ndarray, d: float,
                                     pixel_size: float, use_radians=False) -> np.ndarray:
     """
