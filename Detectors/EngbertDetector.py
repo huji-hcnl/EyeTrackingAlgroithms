@@ -84,6 +84,8 @@ class EngbertDetector(BaseDetector):
             velocity = diff * (sampling_rate / (2 * (window_size + 1))
         5. For the first and last `window_size` samples, the velocity is np.nan
         """
+        if not np.isfinite(self._sr):
+            raise RuntimeError("Invalid sampling rate, cannot calculate velocity")
         arr_copy = np.copy(arr)
         ws = self._derivation_window_size
         velocities = np.full_like(arr_copy, np.nan)
