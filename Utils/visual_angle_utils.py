@@ -16,7 +16,7 @@ def visual_angle_to_pixels(deg: float, d: float, pixel_size: float) -> float:
     :param d: the distance (in cm) from the screen.
     :param pixel_size: the size (of the diagonal) of a pixel (in cm).
 
-    :return: the number of pixels that correspond to the given visual angle. If deg is not finite, returns np.nan.
+    :return: the number of pixels that correspond to the given visual angle. If `deg` is not finite, returns np.nan.
     """
     if not np.isfinite(deg):
         return np.nan
