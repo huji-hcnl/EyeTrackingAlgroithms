@@ -67,11 +67,8 @@ def pixels_array_to_vis_angle_array(xs: np.ndarray, ys: np.ndarray, d: float,
     """
     assert len(xs) == len(ys), "x-array and y-array must be of the same length"
     pixel_distances = pixel_utils.calculate_euclidean_distances(xs, ys)
-    cm_distances = pixel_distances * pixel_size
-    angles = np.arctan(cm_distances / d)
-    if not use_radians:
-        angles = np.rad2deg(angles)
-    return angles
+    visual_angles = [pixels_to_visual_angle(px_dist, d, pixel_size, use_radians) for px_dist in pixel_distances]
+    return np.array(visual_angles)
 
 
 def pixels_array_to_vis_angle_velocity_array(xs: np.ndarray, ys: np.ndarray, timestamps: np.ndarray,
