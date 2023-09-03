@@ -27,7 +27,7 @@ def create_gaze_events(gaze_data: pd.DataFrame, candidates: List[GazeEventTypeEn
     events = []
     chunk_idxs = arr_utils.get_chunk_indices(candidates)
     for chunk_idxs in chunk_idxs:
-        event_type: GazeEventTypeEnum = candidates[chunk_idxs[0]]
+        event_type = GazeEventTypeEnum(candidates[chunk_idxs[0]])
         try:
             chunk_data = gaze_data.iloc[chunk_idxs]
             event = _create_event(event_type=event_type, event_data=chunk_data,
