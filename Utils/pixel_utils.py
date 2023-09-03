@@ -1,6 +1,8 @@
 import numpy as np
 from typing import Tuple
 
+import constants as cnst
+
 
 def calculate_euclidean_distances(xs: np.ndarray, ys: np.ndarray) -> np.ndarray:
     """
@@ -21,13 +23,13 @@ def calculate_velocities(xs: np.ndarray, ys: np.ndarray, timestamps: np.ndarray)
     Calculates the velocity of the gaze in pixels per milliseconds.
     :param xs: 1D array of x coordinates
     :param ys: 1D array of y coordinates
-    :param timestamps: 1D array of timestamps
-    :return: velocity (in pixel units per second) between subsequent pixels
+    :param timestamps: 1D array of timestamps (in milliseconds)
+    :return: velocity (pixel / second) between subsequent pixels
     """
     assert len(xs) == len(ys) == len(timestamps), "x-array, y-array and timestamps-array must be of the same length"
     dist = calculate_euclidean_distances(xs, ys)
     dt = np.concatenate(([np.nan], np.diff(timestamps)))  # first dt is NaN
-    velocities = dist / dt
+    velocities = cnst.MILLISECONDS_PER_SECOND * dist / dt
     return velocities
 
 

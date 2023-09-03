@@ -28,13 +28,13 @@ class BaseGazeEvent(BaseEvent):
     @property
     def max_velocity(self) -> float:
         """ Returns the maximum velocity of the event in pixels per second """
-        return float(np.nanmax(self._velocities)) * 1000
+        return float(np.nanmax(self._velocities))
 
     @final
     @property
     def mean_velocity(self) -> float:
         """ Returns the mean velocity of the event in pixels per second """
-        return float(np.nanmean(self._velocities)) * 1000
+        return float(np.nanmean(self._velocities))
 
     @final
     def get_velocities(self) -> np.ndarray:
