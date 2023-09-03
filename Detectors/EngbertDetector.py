@@ -103,6 +103,3 @@ class EngbertDetector(BaseDetector):
         median_of_squares = np.nanmedian(np.power(arr, 2))
         sd = np.sqrt(median_of_squares - squared_median)
         return float(np.nanmax([sd, cnst.EPSILON]))
-
-
-
