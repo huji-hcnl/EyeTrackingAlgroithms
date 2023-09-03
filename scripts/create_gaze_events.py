@@ -13,8 +13,8 @@ from GazeEvents.SaccadeEvent import SaccadeEvent
 from GazeEvents.FixationEvent import FixationEvent
 
 
-def create_gaze_events(gaze_data: pd.DataFrame, candidates: List[GazeEventTypeEnum],
-                       viewer_distance: float, eye: str
+def create_gaze_events(data: pd.DataFrame,
+                       candidates_column: str, viewer_distance: float, eye: str
                        ) -> List[Union[BlinkEvent, SaccadeEvent, FixationEvent]]:
     """
     Creates a list of gaze events from the given gaze data, based on the given candidates.
@@ -23,13 +23,16 @@ def create_gaze_events(gaze_data: pd.DataFrame, candidates: List[GazeEventTypeEn
     eye = eye.lower()
     if eye not in ["left", "right"]:
         raise ValueError(f"Invalid eye: {eye}")
+    if candidates_column not in data.columns:
+        raise ValueError(f"No column named {candidates_column} in the given `data`")
+    candidates = data[candidates_column].values
 
     events = []
     chunk_idxs = arr_utils.get_chunk_indices(candidates)
     for chunk_idxs in chunk_idxs:
         event_type = GazeEventTypeEnum(candidates[chunk_idxs[0]])
         try:
-            chunk_data = gaze_data.iloc[chunk_idxs]
+            chunk_data = data.iloc[chunk_idxs]
             event = _create_event(event_type=event_type, event_data=chunk_data,
                                   viewer_distance=viewer_distance, eye=eye)
             events.append(event)
