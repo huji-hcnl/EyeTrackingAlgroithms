@@ -1,3 +1,4 @@
+import traceback
 import numpy as np
 from abc import ABC, abstractmethod
 from typing import final, List, Tuple, Set
@@ -60,7 +61,8 @@ class BaseDetector(ABC):
             candidates = self._set_short_chunks_as_undefined(candidates)
             candidates = self._merge_proximal_chunks_of_identical_values(candidates)
         except ValueError as e:
-            print(f"WARNING: {e}")
+            trace = traceback.format_exc()
+            print(f"Failed to detect gaze-event candidates:\t{type(e)}\n\t{trace}")
         return list(candidates)
 
     @final
