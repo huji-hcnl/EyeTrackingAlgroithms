@@ -63,7 +63,7 @@ class BaseDetector(ABC):
             candidates = self._merge_proximal_chunks_of_identical_values(candidates)
         except ValueError as e:
             trace = traceback.format_exc()
-            print(f"Failed to detect gaze-event candidates:\t{type(e)}\n\t{trace}")
+            print(f"Failed to detect gaze-event candidates:\t{e.__class__.__name__}\n\t{trace}")
         return list(candidates)
 
     @final
