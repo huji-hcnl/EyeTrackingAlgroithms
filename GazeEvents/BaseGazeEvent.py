@@ -26,7 +26,7 @@ class BaseGazeEvent(BaseEvent):
 
     @final
     @property
-    def max_velocity(self) -> float:
+    def peak_velocity(self) -> float:
         """ Returns the maximum velocity of the event in pixels per second """
         return float(np.nanmax(self._velocities))
 
@@ -47,11 +47,11 @@ class BaseGazeEvent(BaseEvent):
         """
         creates a pandas Series with summary of saccade information.
         :return: a pd.Series with the same values as super().to_series() and the following additional values:
-            - max_velocity: the maximum velocity of the event in pixels per second
+            - peak_velocity: the maximum velocity of the event in pixels per second
             - mean_velocity: the mean velocity of the event in pixels per second
         """
         series = super().to_series()
-        series["max_velocity"] = self.max_velocity
+        series["peak_velocity"] = self.peak_velocity
         series["mean_velocity"] = self.mean_velocity
         return series
 
