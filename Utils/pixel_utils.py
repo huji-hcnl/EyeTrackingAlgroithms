@@ -2,6 +2,7 @@ import numpy as np
 from typing import Tuple
 
 import constants as cnst
+import Utils.array_utils as arr_utils
 
 
 def calculate_euclidean_distances(xs: np.ndarray, ys: np.ndarray) -> np.ndarray:
@@ -15,7 +16,7 @@ def calculate_euclidean_distances(xs: np.ndarray, ys: np.ndarray) -> np.ndarray:
     x_diff = np.diff(xs)
     y_diff = np.diff(ys)
     dist = np.sqrt(np.power(x_diff, 2) + np.power(y_diff, 2))
-    return np.concatenate(([np.nan], dist))  # first distance is NaN
+    return np.concatenate(([0], dist))  # first distance is 0
 
 
 def calculate_velocities(xs: np.ndarray, ys: np.ndarray, timestamps: np.ndarray) -> np.ndarray:
@@ -28,8 +29,8 @@ def calculate_velocities(xs: np.ndarray, ys: np.ndarray, timestamps: np.ndarray)
     """
     assert len(xs) == len(ys) == len(timestamps), "x-array, y-array and timestamps-array must be of the same length"
     dist = calculate_euclidean_distances(xs, ys)
-    dt = np.concatenate(([np.nan], np.diff(timestamps)))  # first dt is NaN
-    velocities = cnst.MILLISECONDS_PER_SECOND * dist / dt
+    cum_dist = np.cumsum(dist)
+    velocities = arr_utils.temporal_derivative(cum_dist, timestamps, deg=1, time_coeff=cnst.MILLISECONDS_PER_SECOND)
     return velocities
 
 

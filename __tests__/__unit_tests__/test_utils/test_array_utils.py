@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
+import constants as cnst
 import Utils.array_utils as arr_utils
 
 
@@ -14,6 +15,45 @@ class TestIOUtils(unittest.TestCase):
         self.assertTrue(arr_utils.is_one_dimensional([[1, 2, 3]]))
         self.assertFalse(arr_utils.is_one_dimensional([[1, 2], [3, 4]]))
         self.assertRaises(ValueError, arr_utils.is_one_dimensional, [[1, 2], [3]])
+
+    def test_temporal_derivative(self):
+        n_samples = 10
+        t = np.arange(n_samples)
+        f0, f1, f2 = [np.power(t, d) for d in range(3)]
+
+        d = 0
+        self.assertTrue(np.array_equal(f0, arr_utils.temporal_derivative(f0, t, deg=d)))
+        self.assertTrue(np.array_equal(f1, arr_utils.temporal_derivative(f1, t, deg=d)))
+        self.assertTrue(np.array_equal(f2, arr_utils.temporal_derivative(f2, t, deg=d)))
+
+        d = 1
+        self.assertTrue(
+            np.array_equal(np.concatenate([[np.nan], np.zeros(n_samples - 1)]),
+                           arr_utils.temporal_derivative(f0, t, deg=d), equal_nan=True))
+        self.assertTrue(
+            np.array_equal(np.concatenate([[np.nan], np.ones(n_samples - 1)]) * cnst.MILLISECONDS_PER_SECOND,
+                           arr_utils.temporal_derivative(f1, t, deg=d), equal_nan=True))
+        self.assertTrue(
+            np.array_equal(
+                np.concatenate([[np.nan], [2 * i + 1 for i in range(n_samples - 1)]]) * cnst.MILLISECONDS_PER_SECOND,
+                arr_utils.temporal_derivative(f2, t, deg=d), equal_nan=True))
+
+        d = 2
+        self.assertTrue(
+            np.array_equal(np.concatenate([[np.nan, np.nan], np.zeros(n_samples - 2)]),
+                           arr_utils.temporal_derivative(f0, t, deg=d), equal_nan=True))
+        self.assertTrue(
+            np.array_equal(np.concatenate([[np.nan, np.nan], np.zeros(n_samples - 2)]),
+                           arr_utils.temporal_derivative(f1, t, deg=d), equal_nan=True))
+        self.assertTrue(
+            np.array_equal(np.concatenate([[np.nan, np.nan], np.full(n_samples - 2, 2)]) * cnst.MILLISECONDS_PER_SECOND ** 2,
+                           arr_utils.temporal_derivative(f2, t, deg=d), equal_nan=True))
+
+        d = 3
+        exp = np.concatenate([[np.nan, np.nan, np.nan], np.zeros(n_samples - 3)])
+        self.assertTrue(np.array_equal(exp, arr_utils.temporal_derivative(f0, t, deg=d), equal_nan=True))
+        self.assertTrue(np.array_equal(exp, arr_utils.temporal_derivative(f1, t, deg=d), equal_nan=True))
+        self.assertTrue(np.array_equal(exp, arr_utils.temporal_derivative(f2, t, deg=d), equal_nan=True))
 
     def test_extract_column_safe(self):
         data = pd.DataFrame(np.random.rand(10, 5), columns=[f"col{i}" for i in range(5)])
