@@ -1,3 +1,4 @@
+import traceback
 import numpy as np
 from abc import ABC, abstractmethod
 from typing import final, List, Tuple, Set
@@ -14,11 +15,12 @@ class BaseDetector(ABC):
     The detection process is implemented in detect_candidates_monocular() and detect_candidates_binocular() and is the
     same for all detectors. Detection steps are as follows:
     1. Verify the input is valid
-    2. Detecting blink candidates based on missing data in the recorded gaze data
-    3. Detecting event candidates using unique algorithms for each detector (implemented in _identify_event_candidates())
-    4. Filling short chunks of event candidates with GazeEventTypeEnum.UNDEFINED
-    5. Merging chunks of identical event candidates that are close to each other
-    6. If binocular data is available, candidates from both eyes are merged into a single list of candidates based on
+    2. Calculate the sampling rate of the given timestamps
+    3. Detecting blink candidates based on missing data in the recorded gaze data
+    4. Detecting event candidates using unique algorithms for each detector (implemented in _identify_event_candidates())
+    5. Filling short chunks of event candidates with GazeEventTypeEnum.UNDEFINED
+    6. Merging chunks of identical event candidates that are close to each other
+    7. If binocular data is available, candidates from both eyes are merged into a single list of candidates based on
     pre-defined logic (e.g. both eyes must detect a candidate for it to be considered a binocular candidate).
     """
 
@@ -60,7 +62,8 @@ class BaseDetector(ABC):
             candidates = self._set_short_chunks_as_undefined(candidates)
             candidates = self._merge_proximal_chunks_of_identical_values(candidates)
         except ValueError as e:
-            print(f"WARNING: {e}")
+            trace = traceback.format_exc()
+            print(f"Failed to detect gaze-event candidates:\t{e.__class__.__name__}\n\t{trace}")
         return list(candidates)
 
     @final

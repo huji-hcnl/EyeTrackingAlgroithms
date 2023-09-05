@@ -2,8 +2,10 @@ import numpy as np
 import pandas as pd
 from typing import final
 
-from GazeEvents.BaseEvent import BaseEvent
+import Config.experiment_config as cnfg
 import Utils.pixel_utils as pixel_utils
+import Utils.visual_angle_utils as visang_utils
+from GazeEvents.BaseEvent import BaseEvent
 
 
 class BaseGazeEvent(BaseEvent):
@@ -26,15 +28,33 @@ class BaseGazeEvent(BaseEvent):
 
     @final
     @property
-    def max_velocity(self) -> float:
+    def peak_velocity(self) -> float:
         """ Returns the maximum velocity of the event in pixels per second """
-        return float(np.nanmax(self._velocities)) * 1000
+        return float(np.nanmax(self._velocities))
+
+    @final
+    @property
+    def peak_velocity_deg(self) -> float:
+        """ Returns the maximum velocity of the event in degrees per second """
+        px_vel = self.peak_velocity
+        return visang_utils.pixels_to_visual_angle(num_px=px_vel, d=self._viewer_distance,
+                                                   pixel_size=cnfg.SCREEN_MONITOR.pixel_size,
+                                                   use_radians=False)
 
     @final
     @property
     def mean_velocity(self) -> float:
         """ Returns the mean velocity of the event in pixels per second """
-        return float(np.nanmean(self._velocities)) * 1000
+        return float(np.nanmean(self._velocities))
+
+    @final
+    @property
+    def mean_velocity_deg(self) -> float:
+        """ Returns the mean velocity of the event in degrees per second """
+        px_vel = self.mean_velocity
+        return visang_utils.pixels_to_visual_angle(num_px=px_vel, d=self._viewer_distance,
+                                                   pixel_size=cnfg.SCREEN_MONITOR.pixel_size,
+                                                   use_radians=False)
 
     @final
     def get_velocities(self) -> np.ndarray:
@@ -47,11 +67,11 @@ class BaseGazeEvent(BaseEvent):
         """
         creates a pandas Series with summary of saccade information.
         :return: a pd.Series with the same values as super().to_series() and the following additional values:
-            - max_velocity: the maximum velocity of the event in pixels per second
+            - peak_velocity: the maximum velocity of the event in pixels per second
             - mean_velocity: the mean velocity of the event in pixels per second
         """
         series = super().to_series()
-        series["max_velocity"] = self.max_velocity
+        series["peak_velocity"] = self.peak_velocity
         series["mean_velocity"] = self.mean_velocity
         return series
 

@@ -1,4 +1,6 @@
+import warnings as w
 import numpy as np
+import pandas as pd
 from typing import List, Tuple
 
 
@@ -10,6 +12,15 @@ def is_one_dimensional(arr) -> bool:
     if arr.ndim == 2 and min(arr.shape) == 1:
         return True
     return False
+
+
+def extract_column_safe(data: pd.DataFrame, colname: str, warn: bool = True) -> np.ndarray:
+    try:
+        return data[colname].values
+    except KeyError:
+        if warn:
+            w.warn(f"Column {colname} not found in the given DataFrame")
+        return np.full(shape=data.shape[0], fill_value=np.nan)
 
 
 def get_chunk_indices(arr) -> List[np.ndarray]:

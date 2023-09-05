@@ -63,12 +63,13 @@ class EngbertDetector(BaseDetector):
         median_std = self._median_standard_deviation(velocities)
         return self._lambda_noise_threshold * median_std
 
-    def _verify_inputs(self, t: np.ndarray, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _verify_inputs(self, t: np.ndarray, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         t, x, y = super()._verify_inputs(t, x, y)
         if len(x) < 2 * self._derivation_window_size:
             raise ValueError(
-                f"x and y must be of length at least 2 * derivation_window_size (={2 * self._derivation_window_size})")
-        return x, y
+                "input arrays (`x`, `y` & `t`) must be of length at least " +
+                f"2 * derivation_window_size (={2 * self._derivation_window_size}) samples")
+        return t, x, y
 
     def _calculate_axial_velocity(self, arr) -> np.ndarray:
         """
@@ -83,6 +84,8 @@ class EngbertDetector(BaseDetector):
             velocity = diff * (sampling_rate / (2 * (window_size + 1))
         5. For the first and last `window_size` samples, the velocity is np.nan
         """
+        if not np.isfinite(self._sr):
+            raise RuntimeError("Invalid sampling rate, cannot calculate velocity")
         arr_copy = np.copy(arr)
         ws = self._derivation_window_size
         velocities = np.full_like(arr_copy, np.nan)
@@ -102,6 +105,3 @@ class EngbertDetector(BaseDetector):
         median_of_squares = np.nanmedian(np.power(arr, 2))
         sd = np.sqrt(median_of_squares - squared_median)
         return float(np.nanmax([sd, cnst.EPSILON]))
-
-
-
