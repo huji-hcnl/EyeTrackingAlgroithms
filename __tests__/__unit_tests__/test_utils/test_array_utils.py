@@ -1,6 +1,7 @@
 import unittest
 
 import numpy as np
+import pandas as pd
 
 import Utils.array_utils as arr_utils
 
@@ -13,6 +14,22 @@ class TestIOUtils(unittest.TestCase):
         self.assertTrue(arr_utils.is_one_dimensional([[1, 2, 3]]))
         self.assertFalse(arr_utils.is_one_dimensional([[1, 2], [3, 4]]))
         self.assertRaises(ValueError, arr_utils.is_one_dimensional, [[1, 2], [3]])
+
+    def test_extract_column_safe(self):
+        data = pd.DataFrame(np.random.rand(10, 5), columns=[f"col{i}" for i in range(5)])
+
+        colname = "col4"
+        obs = arr_utils.extract_column_safe(data, colname)
+        exp = data[colname].values
+        self.assertTrue(np.array_equal(obs, exp))
+
+        colname = "col5"
+        obs = arr_utils.extract_column_safe(data, colname, warn=False)
+        exp = np.full(shape=data.shape[0], fill_value=np.nan)
+        self.assertTrue(np.array_equal(obs, exp, equal_nan=True))
+
+        colname = "col5"
+        self.assertWarns(UserWarning, arr_utils.extract_column_safe, data, colname, warn=True)
 
     def test_get_chunk_indices(self):
         arr = [1, 1, 1, 2, 2, 3, 3, 3, 3]

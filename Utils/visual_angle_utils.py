@@ -16,7 +16,7 @@ def visual_angle_to_pixels(deg: float, d: float, pixel_size: float) -> float:
     :param d: the distance (in cm) from the screen.
     :param pixel_size: the size (of the diagonal) of a pixel (in cm).
 
-    :return: the number of pixels that correspond to the given visual angle. If deg is not finite, returns np.nan.
+    :return: the number of pixels that correspond to the given visual angle. If `deg` is not finite, returns np.nan.
     """
     if not np.isfinite(deg):
         return np.nan
@@ -25,10 +25,39 @@ def visual_angle_to_pixels(deg: float, d: float, pixel_size: float) -> float:
     return edge_pixels
 
 
-def pixels_to_visual_angles(xs: np.ndarray, ys: np.ndarray, d: float, pixel_size: float,
-                            use_radians=False) -> np.ndarray:
+def pixels_to_visual_angle(num_px: float, d: float, pixel_size: float, use_radians=False) -> float:
     """
-    Calculates the visual angle of each point in the given x and y coordinates.
+    Calculates the visual angle that corresponds to `num_px` pixels, given that the viewer is sitting at a distance of
+    `d` centimeters from the screen, and that the size of each pixel is `pixel_size` centimeters.
+
+    See details on calculations in Kaiser, Peter K. "Calculation of Visual Angle". The Joy of Visual Perception: A Web Book:
+        http://www.yorku.ca/eye/visangle.htm
+
+    :param num_px: the number of pixels.
+    :param d: the distance (in cm) from the screen.
+    :param pixel_size: the size (of the diagonal) of a pixel (in cm).
+    :param use_radians: if True, returns the angle in radians. Otherwise, returns the angle in degrees.
+
+    :return: the visual angle (in degrees) that corresponds to the given number of pixels.
+        If `num_px` is not finite, returns np.nan.
+
+    :raises ValueError: if `num_px` is negative.
+    """
+    if not np.isfinite(num_px):
+        return np.nan
+    if num_px < 0:
+        raise ValueError("argument `num_px` must be a non-negative number")
+    cm_dist = num_px * pixel_size
+    angle = np.arctan(cm_dist / d)
+    if not use_radians:
+        angle = np.rad2deg(angle)
+    return angle
+
+
+def pixels_array_to_vis_angle_array(xs: np.ndarray, ys: np.ndarray, d: float,
+                                    pixel_size: float, use_radians=False) -> np.ndarray:
+    """
+    Calculates the visual angle between each pair of subsequent pixels in the given x and y coordinates.
     :param xs: 1D array of x coordinates
     :param ys: 1D array of y coordinates
     :param d: distance from the screen in centimeters.
@@ -38,15 +67,12 @@ def pixels_to_visual_angles(xs: np.ndarray, ys: np.ndarray, d: float, pixel_size
     """
     assert len(xs) == len(ys), "x-array and y-array must be of the same length"
     pixel_distances = pixel_utils.calculate_euclidean_distances(xs, ys)
-    cm_distances = pixel_distances * pixel_size
-    angles = np.arctan(cm_distances / d)
-    if not use_radians:
-        angles = np.rad2deg(angles)
-    return angles
+    visual_angles = [pixels_to_visual_angle(px_dist, d, pixel_size, use_radians) for px_dist in pixel_distances]
+    return np.array(visual_angles)
 
 
-def pixels_to_angular_velocities(xs: np.ndarray, ys: np.ndarray, timestamps: np.ndarray, d: float, pixel_size: float,
-                                 use_radians=False) -> np.ndarray:
+def pixels_array_to_vis_angle_velocity_array(xs: np.ndarray, ys: np.ndarray, timestamps: np.ndarray,
+                                             d: float, pixel_size: float, use_radians=False) -> np.ndarray:
     """
     Calculates the visual angle between subsequent pixels and divides it by the time difference between the two pixels.
     :param xs: 1D array of x coordinates
@@ -58,7 +84,7 @@ def pixels_to_angular_velocities(xs: np.ndarray, ys: np.ndarray, timestamps: np.
     :return: angular velocity (in degrees- or radian-per-second) of each point (first is NaN)
     """
     assert len(xs) == len(ys) == len(timestamps), "x-array, y-array and timestamps-array must be of the same length"
-    angles = pixels_to_visual_angles(xs, ys, d, pixel_size, use_radians)
+    angles = pixels_array_to_vis_angle_array(xs, ys, d, pixel_size, use_radians)
     dt = np.concatenate(([np.nan], np.diff(timestamps)))  # first dt is NaN
     angular_velocities = angles / dt
     return angular_velocities
@@ -85,7 +111,7 @@ def visual_angle_between_pixels(p1: Tuple[float, float], p2: Tuple[float, float]
     if not np.all(np.isfinite(np.concatenate((xs, ys)))):
         # if any of the coordinates is invalid
         return np.nan
-    angles = pixels_to_visual_angles(xs, ys, distance_from_screen, pixel_size, use_radians)
+    angles = pixels_array_to_vis_angle_array(xs, ys, distance_from_screen, pixel_size, use_radians)
     # angles[0] should be NaN, since it's the angle between the first pixel and itself
     assert len(angles) == 2 and np.isnan(angles[0]), "unexpected result from pixels_to_visual_angles"
     return angles[1]

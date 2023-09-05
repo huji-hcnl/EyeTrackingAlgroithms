@@ -33,10 +33,9 @@ class SaccadeEvent(BaseGazeEvent):
 
     @property
     def amplitude(self) -> float:
-        """ returns the amplitude of the saccade (visual angle) in degrees """
-        return visang_utils.visual_angle_between_pixels(p1=self.start_point, p2=self.end_point,
-                                                        distance_from_screen=self._viewer_distance,
-                                                        pixel_size=cnfg.SCREEN_MONITOR.pixel_size)
+        return visang_utils.pixels_to_visual_angle(num_px=self.distance, d=self._viewer_distance,
+                                                   pixel_size=cnfg.SCREEN_MONITOR.pixel_size,
+                                                   use_radians=False)
 
     @property
     def azimuth(self) -> float:

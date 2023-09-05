@@ -13,8 +13,8 @@ from GazeEvents.SaccadeEvent import SaccadeEvent
 from GazeEvents.FixationEvent import FixationEvent
 
 
-def create_gaze_events(gaze_data: pd.DataFrame, candidates: List[GazeEventTypeEnum],
-                       viewer_distance: float, eye: str
+def create_gaze_events(data: pd.DataFrame,
+                       candidates_column: str, viewer_distance: float, eye: str
                        ) -> List[Union[BlinkEvent, SaccadeEvent, FixationEvent]]:
     """
     Creates a list of gaze events from the given gaze data, based on the given candidates.
@@ -23,13 +23,16 @@ def create_gaze_events(gaze_data: pd.DataFrame, candidates: List[GazeEventTypeEn
     eye = eye.lower()
     if eye not in ["left", "right"]:
         raise ValueError(f"Invalid eye: {eye}")
+    if candidates_column not in data.columns:
+        raise ValueError(f"No column named {candidates_column} in the given `data`")
+    candidates = data[candidates_column].values
 
     events = []
     chunk_idxs = arr_utils.get_chunk_indices(candidates)
     for chunk_idxs in chunk_idxs:
-        event_type: GazeEventTypeEnum = candidates[chunk_idxs[0]]
+        event_type = GazeEventTypeEnum(candidates[chunk_idxs[0]])
         try:
-            chunk_data = gaze_data.iloc[chunk_idxs]
+            chunk_data = data.iloc[chunk_idxs]
             event = _create_event(event_type=event_type, event_data=chunk_data,
                                   viewer_distance=viewer_distance, eye=eye)
             events.append(event)
@@ -50,28 +53,20 @@ def _create_event(event_type: GazeEventTypeEnum, event_data: pd.DataFrame,
     Creates a single gaze event from the given `event_data`, assuming it has the predefined column names from the
     Config.experiment_config module. This is True for all datasets that were parsed using a DataParser class.
     """
-    x_name = cnst.LEFT_X if eye == "left" else cnst.RIGHT_X
-    y_name = cnst.LEFT_Y if eye == "left" else cnst.RIGHT_Y
-    pupil_name = cnst.LEFT_PUPIL if eye == "left" else cnst.RIGHT_PUPIL
-    return _create_event_raw(event_type=event_type,
-                             t=event_data[cnst.MILLISECONDS].values,
-                             x=event_data[x_name].values,
-                             y=event_data[y_name].values,
-                             pupil=event_data[pupil_name].values,
-                             viewer_distance=viewer_distance)
-
-
-def _create_event_raw(event_type: GazeEventTypeEnum, t: np.ndarray,
-                      x: Optional[np.ndarray] = None, y: Optional[np.ndarray] = None,
-                      pupil: Optional[np.ndarray] = None, viewer_distance: Optional[float] = None
-                      ) -> Union[None, BlinkEvent, SaccadeEvent, FixationEvent]:
-    """ Creates a single gaze event from the given event data. No assumptions are made about the data. """
     if event_type == GazeEventTypeEnum.UNDEFINED:
         return None
-    if event_type == GazeEventTypeEnum.FIXATION:
-        return FixationEvent(timestamps=t, x=x, y=y, pupil=pupil, viewer_distance=viewer_distance)
-    if event_type == GazeEventTypeEnum.SACCADE:
-        return SaccadeEvent(timestamps=t, x=x, y=y, viewer_distance=viewer_distance)
+    should_warn = True
+    t_data = arr_utils.extract_column_safe(event_data, cnst.MILLISECONDS, warn=should_warn)
     if event_type == GazeEventTypeEnum.BLINK:
-        return BlinkEvent(timestamps=t)
+        return BlinkEvent(timestamps=t_data)
+
+    x_data = arr_utils.extract_column_safe(event_data, cnst.LEFT_X if eye == "left" else cnst.RIGHT_X, warn=should_warn)
+    y_data = arr_utils.extract_column_safe(event_data, cnst.LEFT_Y if eye == "left" else cnst.RIGHT_Y, warn=should_warn)
+    if event_type == GazeEventTypeEnum.SACCADE:
+        return SaccadeEvent(timestamps=t_data, x=x_data, y=y_data, viewer_distance=viewer_distance)
+    pupil_data = arr_utils.extract_column_safe(event_data, cnst.LEFT_PUPIL if eye == "left" else cnst.RIGHT_PUPIL,
+                                               warn=should_warn)
+    if event_type == GazeEventTypeEnum.FIXATION:
+        return FixationEvent(timestamps=t_data, x=x_data, y=y_data, pupil=pupil_data,
+                             viewer_distance=viewer_distance)
     raise ValueError(f"Unknown event type: {event_type}")
