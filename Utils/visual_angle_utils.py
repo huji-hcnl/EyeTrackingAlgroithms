@@ -41,12 +41,12 @@ def pixels_to_visual_angle(num_px: float, d: float, pixel_size: float, use_radia
     :return: the visual angle (in degrees) that corresponds to the given number of pixels.
         If `num_px` is not finite, returns np.nan.
 
-    :raises ValueError: if `num_px` is negative.
+    :raises ValueError: if any of the arguments is negative.
     """
-    if not np.isfinite(num_px):
+    if not np.isfinite([num_px, d, pixel_size]).all():
         return np.nan
-    if num_px < 0:
-        raise ValueError("argument `num_px` must be a non-negative number")
+    if (np.array([num_px, d, pixel_size]) < 0).any():
+        raise ValueError("arguments `num_px`, `d` and `pixel_size` must be non-negative numbers")
     cm_dist = num_px * pixel_size
     angle = np.arctan(cm_dist / d)
     if not use_radians:
