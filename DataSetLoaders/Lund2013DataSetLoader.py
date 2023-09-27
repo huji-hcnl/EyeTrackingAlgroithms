@@ -50,7 +50,7 @@ class Lund2013DataSetLoader(BaseDataSetLoader):
 
         # list all files in the zip archive that are relevant to this dataset
         # replaces erroneously labelled files with the corrected ones (see readme.md for more info)
-        prefix = 'EyeMovementDetectorEvaluation-master/annotated_data/data used in the article/'
+        prefix = 'EyeMovementDetectorEvaluation-master/annotated_data/originally uploaded data/'
         erroneous_files = ['UH29_img_Europe_labelled_MN.mat']
         is_valid_file = lambda f: f.startswith(prefix) and f.endswith('.mat') and f not in erroneous_files
         file_names = [f for f in zip_file.namelist() if is_valid_file(f)]
