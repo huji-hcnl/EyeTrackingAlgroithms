@@ -39,12 +39,10 @@ class NHDetector(BaseDetector):
                                         y: np.ndarray,
                                         candidates: List[GazeEventTypeEnum]) -> List[GazeEventTypeEnum]:
         candidates = np.array(candidates)
-        blinks_indexes = np.where(candidates == GazeEventTypeEnum.BLINK)
+        blinks_indexes = np.where(candidates == GazeEventTypeEnum.BLINK)[0]
         # step 1 - filtering, denoising and calculating angular velocities and accelerations
         angular_velocities, angular_accelerations = self._filter_and_denoise(x, y, self._view_dist, self._pixel_size,
                                                                              self._timestamps)
-        # TODO: remove next line
-        angular_velocities *= 10
         # step 2- find velocity peaks = local maximums above velocity threshold
         velocity_peak_threshold, mean_of_below_sampled, std_of_below_samples = NHDetector._find_velocity_peaks(
             angular_velocities)
@@ -118,14 +116,24 @@ class NHDetector(BaseDetector):
                 # calculate the current sample's threshold in a time window od 40 ms
                 window_ending_index = NHDetector._find_window_end_index(saccade_offset_index, 40.0, timestamps)
                 velocities_window = angular_velocities[saccade_offset_index: window_ending_index + 1]
-                below_current_sample = velocities_window[velocities_window < angular_velocities[saccade_offset_index]]
-                # if there is saccade until the end of array, so there aren't samples below the current one
-                if len(below_current_sample) != 0:
-                    saccade_offset_threshold = self._alpha * saccade_onset_threshold + self._beta * \
-                                               (np.mean(below_current_sample) + 3 * np.std(below_current_sample))
-                    # if local minimum and below threshold = offset
-                    if angular_velocities[saccade_offset_index] < saccade_offset_threshold:
-                        break
+                # TODO DECIDE WHICH OPTION
+                # option 1 - calculate mean and std on ALL samples in the window
+                window_mean = np.mean(velocities_window)
+                window_std = np.std(velocities_window)
+                saccade_offset_threshold = self._alpha * saccade_onset_threshold + self._beta * \
+                                           (window_mean + 3 * window_std)
+                if angular_velocities[saccade_offset_index] < saccade_offset_threshold:
+                    break
+
+                # option 2 - calculate m & s on window samples that are below the current potential offset
+                # below_current_sample = velocities_window[velocities_window < angular_velocities[saccade_offset_index]]
+                # # if there is saccade until the end of array, so there aren't samples below the current one
+                # if len(below_current_sample) != 0:
+                #     saccade_offset_threshold = self._alpha * saccade_onset_threshold + self._beta * \
+                #                                (np.mean(below_current_sample) + 3 * np.std(below_current_sample))
+                #     # if local minimum and below threshold = offset
+                #     if angular_velocities[saccade_offset_index] < saccade_offset_threshold:
+                #         break
             saccade_offset_index += 1
         else:
             saccade_offset_index = len(angular_velocities) - 1
@@ -134,7 +142,6 @@ class NHDetector(BaseDetector):
 
     def _saccade_detection(self, velocity_peaks_indexes, angular_velocities, timestamps, candidates,
                            mean_of_below_sampled, std_of_below_samples):
-        # peak_saccade_threshold = mean_of_below_sampled + 3 * std_of_below_samples
         # for step 4
         saccade_peaks_list = []  # save all peaks that were recognized as saccades
         saccade_dict = {}  # for each peak save offset threshold and offset index
@@ -149,7 +156,7 @@ class NHDetector(BaseDetector):
             if timestamps[saccade_offset_index] - timestamps[saccade_onset_index] > self._min_saccade_duration:
                 candidates[saccade_onset_index: saccade_offset_index + 1] = GazeEventTypeEnum.SACCADE
                 saccade_peaks_list.append(peak_index)
-                saccade_dict[peak_index] = (saccade_offset_threshold, saccade_offset_index)
+                saccade_dict[peak_index] = (saccade_offset_threshold, saccade_offset_index, saccade_onset_index)
             else:
                 candidates[saccade_onset_index: saccade_offset_index + 1] = GazeEventTypeEnum.UNDEFINED
 
@@ -190,6 +197,7 @@ class NHDetector(BaseDetector):
             std_of_below_samples = np.std(samples_below_last_threshold)
             current_PT = mean_of_below_samples + 6 * std_of_below_samples
 
+
         return current_PT, mean_of_below_samples, std_of_below_samples
 
     @staticmethod
@@ -211,7 +219,7 @@ class NHDetector(BaseDetector):
         # for each saccade peak glissade onset will be the saccade's offset
         for i, saccade_peak in enumerate(saccade_peaks_list):
             saccade_offset_threshold = saccade_dict[saccade_peak][0]
-            glissade_onset = saccade_dict[saccade_peak][1]
+            glissade_onset = saccade_dict[saccade_peak][1] + 1
             # check low velocity criteria- samples in time window of 40 ms need to be beneath and above offset threshold
             window_ending_index = NHDetector._find_window_end_index(glissade_onset, 40.0, timestamps)
             velocities_window = angular_velocities[glissade_onset: window_ending_index + 1]
@@ -219,7 +227,11 @@ class NHDetector(BaseDetector):
             if np.any(velocities_window > saccade_offset_threshold) and \
                     np.any(velocities_window < saccade_offset_threshold):
                 if i < len(saccade_peaks_list) - 1:
-                    glissade_boundry = saccade_peaks_list[i + 1]
+                    # bound glissade's search to the onset of the next saccade
+                    glissade_boundry = saccade_dict[saccade_peaks_list[i + 1]][2]
+                    # in case of connected saccades, continue until the last of them
+                    if glissade_boundry < saccade_peak:
+                        continue
                 else:
                     glissade_boundry = len(angular_velocities) - 1
                 # the glissade's offset will be the first local minimum below threshold, after the last local maximum
@@ -237,7 +249,6 @@ class NHDetector(BaseDetector):
                             break
                         else:
                             glissade_offset_index += 1
-
                     candidates[glissade_onset: glissade_offset_index + 1] = GazeEventTypeEnum.PSO
 
         return candidates
