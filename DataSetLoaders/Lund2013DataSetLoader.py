@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import requests as req
 from scipy.io import loadmat
-from typing import Tuple, List
+from typing import Tuple
 
 import constants as cnst
 from DataSetLoaders.BaseDataSetLoader import BaseDataSetLoader
