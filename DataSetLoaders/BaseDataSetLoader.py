@@ -17,7 +17,7 @@ class BaseDataSetLoader(ABC):
         response = cls._download_raw_dataset()
         df = cls._parse_response(response)
         df = cls._clean_data(df)
-        df = df[cls.columns()]  # reorder columns
+        # df = df[cls.columns()]  # reorder columns
         return df
 
     @classmethod

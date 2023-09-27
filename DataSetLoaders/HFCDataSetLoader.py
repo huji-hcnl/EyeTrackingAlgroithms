@@ -39,11 +39,6 @@ class HFCDataSetLoader(BaseDataSetLoader):
     __SUBJECT_TYPE = "subject_type"
 
     @classmethod
-    def columns(cls) -> List[str]:
-        return [cnst.SUBJECT_ID, cls.__SUBJECT_TYPE, cnst.STIMULUS, cnst.TRIAL,
-                cnst.MILLISECONDS, cnst.LEFT_X, cnst.LEFT_Y]
-
-    @classmethod
     def _parse_response(cls, response: req.Response) -> pd.DataFrame:
         zip_file = zp.ZipFile(io.BytesIO(response.content))
 

@@ -45,11 +45,6 @@ class Lund2013DataSetLoader(BaseDataSetLoader):
     __VIEWER_DISTANCE_CM = "viewer_distance_cm"
 
     @classmethod
-    def columns(cls) -> List[str]:
-        return [cnst.SUBJECT_ID, cls.__VIEWER_DISTANCE_CM, cnst.STIMULUS, cls.__STIMULUS_NAME, cls.__PIXEL_SIZE_CM,
-                cls.__RATER, cnst.TRIAL, cnst.MILLISECONDS, cnst.RIGHT_X, cnst.RIGHT_Y, cnst.EVENT_TYPE]
-
-    @classmethod
     def _parse_response(cls, response: req.Response) -> pd.DataFrame:
         zip_file = zp.ZipFile(io.BytesIO(response.content))
 
