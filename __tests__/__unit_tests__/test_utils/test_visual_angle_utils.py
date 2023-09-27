@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 
+import constants as cnst
 import Utils.visual_angle_utils as visang_utils
 
 
@@ -26,28 +27,30 @@ class TestVisualAngleUtils(unittest.TestCase):
                                                                         use_radians=True))
         self.assertTrue(np.isnan(visang_utils.pixels_to_visual_angle(num_px=np.inf, d=self.D, pixel_size=self.PS)))
         self.assertRaises(ValueError, visang_utils.pixels_to_visual_angle, num_px=-1, d=self.D, pixel_size=self.PS)
+        self.assertRaises(ValueError, visang_utils.pixels_to_visual_angle, num_px=1, d=-1, pixel_size=self.PS)
+        self.assertRaises(ValueError, visang_utils.pixels_to_visual_angle, num_px=1, d=self.D, pixel_size=-1)
 
     def test_pixels_array_to_vis_angle_array(self):
         xs1 = np.zeros(5)
         ys = np.arange(5)
-        self.assertTrue(np.array_equal(np.array([np.nan, 0, 0, 0, 0]),
+        self.assertTrue(np.array_equal(np.array([0, 0, 0, 0, 0]),
                                        visang_utils.pixels_array_to_vis_angle_array(xs1, xs1, self.D, self.PS),
                                        equal_nan=True))
-        self.assertTrue(np.array_equal(np.array([np.nan, 45, 45, 45, 45]),
+        self.assertTrue(np.array_equal(np.array([0, 45, 45, 45, 45]),
                                        visang_utils.pixels_array_to_vis_angle_array(xs1, ys, self.D, self.PS),
                                        equal_nan=True))
-        self.assertTrue(np.array_equal(np.array([np.nan, 45, 45, 45, 45]),
+        self.assertTrue(np.array_equal(np.array([0, 45, 45, 45, 45]),
                                        visang_utils.pixels_array_to_vis_angle_array(xs1, -ys, self.D, self.PS),
                                        equal_nan=True))
         xs2 = np.arange(5)
         exp = np.arctan(np.sqrt(2))
-        self.assertTrue(np.array_equal(np.array([np.nan, exp, exp, exp, exp]),
+        self.assertTrue(np.array_equal(np.array([0, exp, exp, exp, exp]),
                                        visang_utils.pixels_array_to_vis_angle_array(xs2, ys, self.D, self.PS,
                                                                                     use_radians=True),
                                        equal_nan=True))
         xs3 = xs1.copy()
         xs3[2] = np.nan
-        self.assertTrue(np.array_equal(np.array([np.nan, 45, np.nan, np.nan, 45]),
+        self.assertTrue(np.array_equal(np.array([0, 45, np.nan, np.nan, 45]),
                                        visang_utils.pixels_array_to_vis_angle_array(xs3, ys, self.D, self.PS),
                                        equal_nan=True))
         xs4 = xs1[:-1].copy()
@@ -61,16 +64,15 @@ class TestVisualAngleUtils(unittest.TestCase):
                                        visang_utils.pixels_array_to_vis_angle_velocity_array(xs, xs, ts, self.D,
                                                                                              self.PS),
                                        equal_nan=True))
-        self.assertTrue(np.array_equal(np.array([np.nan, 45, 45, 45, 45]),
+        self.assertTrue(np.array_equal(np.array([np.nan, 45, 45, 45, 45]) * cnst.MILLISECONDS_PER_SECOND,
                                        visang_utils.pixels_array_to_vis_angle_velocity_array(xs, ys, ts, self.D,
                                                                                              self.PS),
                                        equal_nan=True))
-        self.assertTrue(np.array_equal(np.array([np.nan, 45, 45, 45, 45]),
+        self.assertTrue(np.array_equal(np.array([np.nan, 45, 45, 45, 45]) * cnst.MILLISECONDS_PER_SECOND,
                                        visang_utils.pixels_array_to_vis_angle_velocity_array(xs, -ys, ts, self.D,
                                                                                              self.PS),
                                        equal_nan=True))
-        print(visang_utils.pixels_array_to_vis_angle_velocity_array(xs, ys, ts * 2, self.D, self.PS))
-        self.assertTrue(np.array_equal(np.array([np.nan, 22.5, 22.5, 22.5, 22.5]),
+        self.assertTrue(np.array_equal(np.array([np.nan, 22.5, 22.5, 22.5, 22.5]) * cnst.MILLISECONDS_PER_SECOND,
                                        visang_utils.pixels_array_to_vis_angle_velocity_array(xs, ys, ts * 2, self.D,
                                                                                              self.PS),
                                        equal_nan=True))
