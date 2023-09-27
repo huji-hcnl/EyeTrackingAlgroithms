@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import requests as req
 from scipy.io import loadmat
-from typing import Tuple
+from typing import Tuple, Dict
 
 import constants as cnst
 from DataSetLoaders.BaseDataSetLoader import BaseDataSetLoader
@@ -42,6 +42,12 @@ class Lund2013DataSetLoader(BaseDataSetLoader):
     __STIMULUS_NAME = f"{cnst.STIMULUS}_name"
     __PIXEL_SIZE_CM = "pixel_size_cm"
     __VIEWER_DISTANCE_CM = "viewer_distance_cm"
+
+    @classmethod
+    def column_order(cls) -> Dict[str, float]:
+        order = BaseDataSetLoader.column_order()
+        order.update({cls.__STIMULUS_NAME: 6.1, cls.__PIXEL_SIZE_CM: 6.2, cls.__VIEWER_DISTANCE_CM: 6.3})
+        return order
 
     @classmethod
     def _parse_response(cls, response: req.Response) -> pd.DataFrame:

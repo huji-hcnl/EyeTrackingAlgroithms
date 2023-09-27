@@ -38,6 +38,12 @@ class HFCDataSetLoader(BaseDataSetLoader):
     __SUBJECT_TYPE = "subject_type"
 
     @classmethod
+    def column_order(cls) -> Dict[str, float]:
+        order = BaseDataSetLoader.column_order()
+        order.update({cls.__SUBJECT_TYPE: 6.1})
+        return order
+
+    @classmethod
     def _parse_response(cls, response: req.Response) -> pd.DataFrame:
         zip_file = zp.ZipFile(io.BytesIO(response.content))
 
