@@ -141,7 +141,7 @@ class Lund2013DataSetLoader(BaseDataSetLoader):
 
     @staticmethod
     def __extract_fields_from_file_name(file) -> Tuple[str, str, str, str]:
-        file_name = os.path.basename(file)  # remove path
+        file_name = os.path.basename(file.name)  # remove path
         if not file_name.endswith(".mat"):
             raise ValueError(f"Expected a `.mat` file, got: {file_name}")
 
