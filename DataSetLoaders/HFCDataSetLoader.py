@@ -11,7 +11,7 @@ from typing import Tuple, Dict
 import constants as cnst
 import Utils.io_utils as ioutils
 from DataSetLoaders.BaseDataSetLoader import BaseDataSetLoader
-
+from Config.GazeEventTypeEnum import get_event_type
 
 class HFCDataSetLoader(BaseDataSetLoader):
     """
@@ -119,6 +119,7 @@ class HFCDataSetLoader(BaseDataSetLoader):
                                                                     f(coder_annotations["FixEnd"]))])
                     evnts[list(fixation_samples)] = 1
                 data[coder_name] = evnts
+                data[coder_name] = data[coder_name].apply(lambda x: get_event_type(x, safe=True))
                 dataframes.append(data)
 
         merged_df = pd.concat(dataframes, ignore_index=True, axis=0)
