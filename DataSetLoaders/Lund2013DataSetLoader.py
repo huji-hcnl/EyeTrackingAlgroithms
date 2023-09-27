@@ -40,7 +40,6 @@ class Lund2013DataSetLoader(BaseDataSetLoader):
     ]
 
     __STIMULUS_NAME = f"{cnst.STIMULUS}_name"
-    __RATER = "rater"
     __PIXEL_SIZE_CM = "pixel_size_cm"
     __VIEWER_DISTANCE_CM = "viewer_distance_cm"
 
@@ -57,12 +56,25 @@ class Lund2013DataSetLoader(BaseDataSetLoader):
         file_names.append('EyeMovementDetectorEvaluation-master/annotated_data/fix_by_Zemblys2018/UH29_img_Europe_labelled_FIX_MN.mat')
 
         # read all files into a list of dataframes
-        dataframes = []
+        dataframes = {}
         for f in file_names:
             file = zip_file.open(f)
             gaze_data = Lund2013DataSetLoader.__read_gaze_data(file)
-            dataframes.append(gaze_data)
-        merged_df = pd.concat(dataframes, ignore_index=True, axis=0)
+            subject_id, stimulus_type, stimulus_name, rater = Lund2013DataSetLoader.__extract_metadata(file)
+            stimulus_name = stimulus_name.removesuffix("_labelled")
+            gaze_data.rename(columns={cnst.EVENT_TYPE: rater}, inplace=True)
+
+            # write the DF to a dict based on the subject id, stimulus type, stimulus name, or add to existing DF
+            existing_df = dataframes.get((subject_id, stimulus_type, stimulus_name), None)
+            if existing_df is None:
+                gaze_data[cnst.SUBJECT_ID] = subject_id
+                gaze_data[cnst.STIMULUS] = stimulus_type
+                gaze_data[cls.__STIMULUS_NAME] = stimulus_name
+                dataframes[(subject_id, stimulus_type, stimulus_name)] = gaze_data
+            else:
+                existing_df[rater] = gaze_data[rater]
+                dataframes[(subject_id, stimulus_type, stimulus_name)] = existing_df
+        merged_df = pd.concat(dataframes.values(), ignore_index=True, axis=0)
         return merged_df
 
     @classmethod
@@ -110,13 +122,6 @@ class Lund2013DataSetLoader(BaseDataSetLoader):
                                 cnst.EVENT_TYPE: labels})
         df[Lund2013DataSetLoader.__VIEWER_DISTANCE_CM] = view_dist
         df[Lund2013DataSetLoader.__PIXEL_SIZE_CM] = pixel_size
-
-        # add metadata columns:
-        subject_id, stimulus_type, stimulus_name, rater = Lund2013DataSetLoader.__extract_fields_from_file_name(file)
-        df[cnst.SUBJECT_ID] = subject_id
-        df[cnst.STIMULUS] = stimulus_type
-        df[Lund2013DataSetLoader.__STIMULUS_NAME] = stimulus_name
-        df[Lund2013DataSetLoader.__RATER] = rater
         return df
 
     @staticmethod
@@ -134,7 +139,7 @@ class Lund2013DataSetLoader(BaseDataSetLoader):
         return timestamps
 
     @staticmethod
-    def __extract_fields_from_file_name(file) -> Tuple[str, str, str, str]:
+    def __extract_metadata(file) -> Tuple[str, str, str, str]:
         file_name = os.path.basename(file.name)  # remove path
         if not file_name.endswith(".mat"):
             raise ValueError(f"Expected a `.mat` file, got: {file_name}")
