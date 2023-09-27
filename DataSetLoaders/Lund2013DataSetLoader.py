@@ -1,29 +1,44 @@
 import os
+import io
+import zipfile as zp
 import numpy as np
 import pandas as pd
 import requests as req
 from scipy.io import loadmat
-from abc import ABC
-from typing import List, Tuple
+from typing import Tuple, List
 
 import constants as cnst
 from DataSetLoaders.BaseDataSetLoader import BaseDataSetLoader
+from Config.ScreenMonitor import ScreenMonitor
+from Config.GazeEventTypeEnum import get_event_type
 
 
-class Lund2013DataSetLoader(BaseDataSetLoader, ABC):
+class Lund2013DataSetLoader(BaseDataSetLoader):
     """
     Loads the dataset presented in the article:
     Andersson, R., Larsson, L., Holmqvist, K., Stridh, M., & Nyström, M. (2017): One algorithm to rule them all? An
     evaluation and discussion of ten eye movement event-detection algorithms. Behavior Research Methods, 49(2), 616-637.
 
     Note that there was an error in the original dataset, which was corrected in a later article:
-    Zemblys, R., Niehorster, D. C., Komogortsev, O., & Holmqvist, K. (2018). Using machine learning to detect events in
-    eye-tracking data. Behavior Research Methods, 50(1), 160–181.
+    Zemblys, R., Niehorster, D.C. & Holmqvist, K. gazeNet: End-to-end eye-movement event detection with deep neural
+    networks. Behav Res 51, 840–864 (2019).
+
+    This loader is based on a previous implementation, see article:
+    Startsev, M., Zemblys, R. Evaluating Eye Movement Event Detection: A Review of the State of the Art.
+    Behav Res 55, 1653–1714 (2023)
     See their implementation: https://github.com/r-zemblys/EM-event-detection-evaluation/blob/main/misc/data_parsers/lund2013.py
     """
 
-    _URL: str = "http://www.kasprowski.pl/datasets/events.zip"
-    _ARTICLE: str = "https://link.springer.com/article/10.3758/s13428-016-0738-9"
+    _URL = 'https://github.com/richardandersson/EyeMovementDetectorEvaluation/archive/refs/heads/master.zip'
+
+    _ARTICLES = [
+        "Andersson, R., Larsson, L., Holmqvist, K., Stridh, M., & Nyström, M. (2017): One algorithm to rule them " +
+        "all? An evaluation and discussion of ten eye movement event-detection algorithms. Behavior Research Methods, " +
+        "49(2), 616-637.",
+
+        "Zemblys, R., Niehorster, D. C., Komogortsev, O., & Holmqvist, K. (2018). Using machine learning to detect " +
+        "events in eye-tracking data. Behavior Research Methods, 50(1), 160–181."
+    ]
 
     __STIMULUS_NAME = f"{cnst.STIMULUS}_name"
     __RATER = "rater"
@@ -37,20 +52,27 @@ class Lund2013DataSetLoader(BaseDataSetLoader, ABC):
 
     @classmethod
     def _parse_response(cls, response: req.Response) -> pd.DataFrame:
-        import io
-        import zipfile
-        zip_file = zipfile.ZipFile(io.BytesIO(response.content))
+        zip_file = zp.ZipFile(io.BytesIO(response.content))
 
+        # list all files in the zip archive that are relevant to this dataset
+        # replaces erroneously labelled files with the corrected ones (see readme.md for more info)
+        prefix = 'EyeMovementDetectorEvaluation-master/annotated_data/data used in the article/'
+        erroneous_files = ['UH29_img_Europe_labelled_MN.mat']
+        is_valid_file = lambda f: f.startswith(prefix) and f.endswith('.mat') and f not in erroneous_files
+        file_names = [f for f in zip_file.namelist() if is_valid_file(f)]
+        file_names.append('EyeMovementDetectorEvaluation-master/annotated_data/fix_by_Zemblys2018/UH29_img_Europe_labelled_FIX_MN.mat')
+
+        # read all files into a list of dataframes
         dataframes = []
-        for filename in zip_file.namelist():
-            if not filename.endswith(".mat"):
-                continue
-            mat_file = zip_file.open(filename)
-            df = cls.__read_mat_file(mat_file)
-            dataframes.append(df)
-        # create a unified dataframe:
-        df = pd.concat(dataframes, ignore_index=True, axis=0)
+        for f in file_names:
+            file = zip_file.open(f)
+            gaze_data = Lund2013DataSetLoader.__read_gaze_data(file)
+            dataframes.append(gaze_data)
+        merged_df = pd.concat(dataframes, ignore_index=True, axis=0)
+        return merged_df
 
+    @classmethod
+    def _clean_data(cls, df: pd.DataFrame) -> pd.DataFrame:
         # replace missing samples with NaNs:
         # this dataset marks missing samples with (0, 0) coordinates, instead of NaNs.
         x_missing = df[cnst.RIGHT_X] == 0
@@ -69,52 +91,22 @@ class Lund2013DataSetLoader(BaseDataSetLoader, ABC):
         df[cnst.TRIAL] = df[cnst.TRIAL].astype(int)
         return df
 
-    @classmethod
-    def __read_mat_file(cls, mat_file) -> pd.DataFrame:
-        gaze_data = cls.__handle_mat_file_data(mat_file)
-        subject_id, stimulus_type, stimulus_name, rater = cls.__handle_mat_file_name(mat_file.name)
-        gaze_data[cnst.SUBJECT_ID] = subject_id
-        gaze_data[cnst.STIMULUS] = stimulus_type
-        gaze_data[cls.__STIMULUS_NAME] = stimulus_name
-        gaze_data[cls.__RATER] = rater
-        return gaze_data
-
     @staticmethod
-    def __handle_mat_file_name(file_name: str) -> Tuple[str, str, str, str]:
-        if not file_name.endswith(".mat"):
-            raise ValueError(f"Expected a `.mat` file, got: {file_name}")
-
-        file_name = os.path.basename(file_name)  # remove path
-        file_name = file_name.replace(".mat", "")  # remove extension
-        # file_name: `<subject_id>_<stimulus_type>_<stimulus_name_1>_ ... _<stimulus_name_N>_labelled_<rater_name>`
-        # moving-dot trials for not contain stimulus names
-        split_name = file_name.split("_")
-        subject_id = split_name[0]                  # subject id is always 1st in the file name
-        stimulus_type = split_name[1]               # stimulus type is always 2nd in the file name
-        rater = split_name[-1]                      # rater is always last in the file name
-        stimulus_name = "_".join(split_name[2:-2])  # stimulus name is everything in between stimulus type and rater
-        if stimulus_type.startswith("trial"):
-            stimulus_type = "moving dot"            # moving-dot stimulus is labelled as "trial1", "trial2", etc.
-        return subject_id, stimulus_type, stimulus_name, rater
-
-    @staticmethod
-    def __handle_mat_file_data(mat_file) -> pd.DataFrame:
-        mat = loadmat(mat_file)
+    def __read_gaze_data(file) -> pd.DataFrame:
+        mat = loadmat(file)
         eyetracking_data = mat["ETdata"]
         eyetracking_data_dict = {name: eyetracking_data[name][0, 0] for name in eyetracking_data.dtype.names}
 
         # extract singleton values and convert from meters to cm:
-        from Config.ScreenMonitor import ScreenMonitor
         view_dist = eyetracking_data_dict['viewDist'][0, 0] * 100
         screen_width, screen_height = eyetracking_data_dict['screenDim'][0] * 100
         screen_res = eyetracking_data_dict['screenRes'][0]  # (1024, 768)
         pixel_size = ScreenMonitor.calculate_pixel_size(screen_width, screen_height, screen_res)
-        sampling_rate = eyetracking_data_dict['sampFreq'][0, 0]
 
         # extract gaze data:
-        from Config.GazeEventTypeEnum import get_event_type
+        sampling_rate = eyetracking_data_dict['sampFreq'][0, 0]
         samples_data = eyetracking_data_dict['pos']
-        right_x, right_y = samples_data[:, 3:5].T
+        right_x, right_y = samples_data[:, 3:5].T  # only recording right eye
         timestamps = Lund2013DataSetLoader.__calculate_timestamps(samples_data[:, 0], sampling_rate)
         labels = [get_event_type(int(event_type), safe=True) for event_type in samples_data[:, 5]]
 
@@ -124,6 +116,13 @@ class Lund2013DataSetLoader(BaseDataSetLoader, ABC):
                                 cnst.EVENT_TYPE: labels})
         df[Lund2013DataSetLoader.__VIEWER_DISTANCE_CM] = view_dist
         df[Lund2013DataSetLoader.__PIXEL_SIZE_CM] = pixel_size
+
+        # add metadata columns:
+        subject_id, stimulus_type, stimulus_name, rater = Lund2013DataSetLoader.__extract_fields_from_file_name(file)
+        df[cnst.SUBJECT_ID] = subject_id
+        df[cnst.STIMULUS] = stimulus_type
+        df[Lund2013DataSetLoader.__STIMULUS_NAME] = stimulus_name
+        df[Lund2013DataSetLoader.__RATER] = rater
         return df
 
     @staticmethod
@@ -139,3 +138,21 @@ class Lund2013DataSetLoader(BaseDataSetLoader, ABC):
         timestamps = timestamps - np.nanmin(timestamps)
         timestamps = timestamps / cnst.MICROSECONDS_PER_MILLISECOND
         return timestamps
+
+    @staticmethod
+    def __extract_fields_from_file_name(file) -> Tuple[str, str, str, str]:
+        file_name = os.path.basename(file)  # remove path
+        if not file_name.endswith(".mat"):
+            raise ValueError(f"Expected a `.mat` file, got: {file_name}")
+
+        # file_name fmt: `<subject_id>_<stimulus_type>_<stimulus_name_1>_ ... _<stimulus_name_N>_labelled_<rater_name>`
+        # moving-dot trials don't contain stimulus names
+        file_name = file_name.replace(".mat", "")  # remove extension
+        split_name = file_name.split("_")
+        subject_id = split_name[0]  # subject id is always 1st in the file name
+        stimulus_type = split_name[1]  # stimulus type is always 2nd in the file name
+        rater = split_name[-1]  # rater is always last in the file name
+        stimulus_name = "_".join(split_name[2:-2])  # stimulus name is everything in between stimulus type and rater
+        if stimulus_type.startswith("trial"):
+            stimulus_type = "moving dot"  # moving-dot stimulus is labelled as "trial1", "trial2", etc.
+        return subject_id, stimulus_type, stimulus_name, rater
