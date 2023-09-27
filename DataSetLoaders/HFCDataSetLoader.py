@@ -1,4 +1,3 @@
-import os
 import io
 import zipfile as zp
 import posixpath as psx
@@ -7,7 +6,7 @@ import pandas as pd
 import requests as req
 import itertools
 from scipy.interpolate import interp1d
-from typing import List, Tuple, Dict
+from typing import Tuple, Dict
 
 import constants as cnst
 import Utils.io_utils as ioutils
