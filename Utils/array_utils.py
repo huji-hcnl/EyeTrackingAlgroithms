@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 from typing import List, Tuple
 
+import constants as cnst
+
 
 def is_one_dimensional(arr) -> bool:
     """ Returns true if the array's shape is (n,) or (1, n) or (n, 1) """
@@ -12,6 +14,23 @@ def is_one_dimensional(arr) -> bool:
     if arr.ndim == 2 and min(arr.shape) == 1:
         return True
     return False
+
+
+def temporal_derivative(f, t, deg: int = 1, time_coeff: float = cnst.MILLISECONDS_PER_SECOND) -> np.ndarray:
+    if not is_one_dimensional(f) or not is_one_dimensional(t):
+        raise ValueError("`f` and `t` must be one-dimensional")
+    if len(f) != len(t):
+        raise ValueError("`f` and `t` must be of the same length")
+    if deg < 0:
+        raise ValueError("`deg` must be non-negative")
+    if time_coeff <= 0:
+        raise ValueError("`time_coeff` must be positive")
+    if deg == 0:
+        return f
+    df = np.concatenate([[0], np.diff(f)])  # first element is 0
+    dt = np.concatenate([[np.nan], np.diff(t)])  # first element is NaN
+    df_dt = np.divide(df, dt) * time_coeff
+    return temporal_derivative(df_dt, t, deg=deg-1, time_coeff=time_coeff)
 
 
 def extract_column_safe(data: pd.DataFrame, colname: str, warn: bool = True) -> np.ndarray:

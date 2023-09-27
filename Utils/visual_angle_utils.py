@@ -1,6 +1,8 @@
 import numpy as np
 from typing import Tuple
 
+import constants as cnst
+import Utils.array_utils as arr_utils
 import Utils.pixel_utils as pixel_utils
 
 
@@ -41,12 +43,12 @@ def pixels_to_visual_angle(num_px: float, d: float, pixel_size: float, use_radia
     :return: the visual angle (in degrees) that corresponds to the given number of pixels.
         If `num_px` is not finite, returns np.nan.
 
-    :raises ValueError: if `num_px` is negative.
+    :raises ValueError: if any of the arguments is negative.
     """
-    if not np.isfinite(num_px):
+    if not np.isfinite([num_px, d, pixel_size]).all():
         return np.nan
-    if num_px < 0:
-        raise ValueError("argument `num_px` must be a non-negative number")
+    if (np.array([num_px, d, pixel_size]) < 0).any():
+        raise ValueError("arguments `num_px`, `d` and `pixel_size` must be non-negative numbers")
     cm_dist = num_px * pixel_size
     angle = np.arctan(cm_dist / d)
     if not use_radians:
@@ -85,9 +87,8 @@ def pixels_array_to_vis_angle_velocity_array(xs: np.ndarray, ys: np.ndarray, tim
     """
     assert len(xs) == len(ys) == len(timestamps), "x-array, y-array and timestamps-array must be of the same length"
     angles = pixels_array_to_vis_angle_array(xs, ys, d, pixel_size, use_radians)
-    dt = np.concatenate(([np.nan], np.diff(timestamps)))  # first dt is NaN
-    angular_velocities = angles / dt
-    return angular_velocities
+    cum_angles = np.cumsum(angles)
+    return arr_utils.temporal_derivative(cum_angles, timestamps, deg=1, time_coeff=cnst.MILLISECONDS_PER_SECOND)
 
 
 def visual_angle_between_pixels(p1: Tuple[float, float], p2: Tuple[float, float],
@@ -112,6 +113,6 @@ def visual_angle_between_pixels(p1: Tuple[float, float], p2: Tuple[float, float]
         # if any of the coordinates is invalid
         return np.nan
     angles = pixels_array_to_vis_angle_array(xs, ys, distance_from_screen, pixel_size, use_radians)
-    # angles[0] should be NaN, since it's the angle between the first pixel and itself
-    assert len(angles) == 2 and np.isnan(angles[0]), "unexpected result from pixels_to_visual_angles"
+    # angles[0] should be 0, since it's the angle between the first pixel and itself
+    assert len(angles) == 2 and angles[0] == 0, "unexpected result from pixels_to_visual_angles"
     return angles[1]
