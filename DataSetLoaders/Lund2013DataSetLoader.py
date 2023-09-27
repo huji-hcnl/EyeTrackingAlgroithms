@@ -24,8 +24,7 @@ class Lund2013DataSetLoader(BaseDataSetLoader):
     networks. Behav Res 51, 840–864 (2019).
 
     This loader is based on a previous implementation, see article:
-    Startsev, M., Zemblys, R. Evaluating Eye Movement Event Detection: A Review of the State of the Art.
-    Behav Res 55, 1653–1714 (2023)
+    Startsev, M., Zemblys, R. Evaluating Eye Movement Event Detection: A Review of the State of the Art. Behav Res 55, 1653–1714 (2023)
     See their implementation: https://github.com/r-zemblys/EM-event-detection-evaluation/blob/main/misc/data_parsers/lund2013.py
     """
 
