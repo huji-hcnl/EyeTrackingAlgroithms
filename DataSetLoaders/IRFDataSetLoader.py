@@ -50,17 +50,8 @@ class IRFDataSetLoader(BaseDataSetLoader):
     def _parse_response(cls, response: req.Response) -> pd.DataFrame:
         zip_file = zp.ZipFile(io.BytesIO(response.content))
 
-        # Get monitor data:
-        prefix = 'irf-master/etdata/lookAtPoint_EL'
-        config_file = psx.join(prefix, "db_config.json")
-        config = json.load(zip_file.open(config_file))['geom']
-        viewer_distance = config['eye_distance'] / 10  # convert to cm
-        pixel_size = ScreenMonitor.calculate_pixel_size(width=config['screen_width'] / 10,
-                                                        height=config['screen_height'] / 10,
-                                                        resolution=(config['display_width_pix'],
-                                                                    config['display_height_pix']))
-
         # Get ET Data:
+        prefix = 'irf-master/etdata/lookAtPoint_EL'
         gaze_file_names = [f for f in zip_file.namelist() if (f.startswith(psx.join(prefix, "lookAtPoint_EL_"))
                                                               and f.endswith('.npy'))]
         gaze_dfs = []
@@ -76,12 +67,22 @@ class IRFDataSetLoader(BaseDataSetLoader):
             _, file_name, _ = ioutils.split_path(f)
             subject_id = file_name.split('_')[-1]  # format: "lookAtPoint_EL_S<subject_num>"
             gaze_data[cnst.SUBJECT_ID] = subject_id
-            gaze_data[cnst.STIMULUS] = "moving_dot"
-            gaze_data[cls.__VIEWER_DISTANCE_CM] = viewer_distance
-            gaze_data[cls.__PIXEL_SIZE_CM] = pixel_size
             gaze_dfs.append(gaze_data)
 
         merged_df = pd.concat(gaze_dfs, ignore_index=True, axis=0)
+
+        # add meta data columns:
+        config_file = psx.join(prefix, "db_config.json")
+        config = json.load(zip_file.open(config_file))['geom']
+        stimulus = "moving_dot"  # all subjects were shown the same 13-point moving dot stimulus
+        viewer_distance = config['eye_distance'] / 10  # convert to cm
+        pixel_size = ScreenMonitor.calculate_pixel_size(width=config['screen_width'] / 10,
+                                                        height=config['screen_height'] / 10,
+                                                        resolution=(config['display_width_pix'],
+                                                                    config['display_height_pix']))
+        merged_df[cnst.STIMULUS] = stimulus
+        merged_df[cls.__VIEWER_DISTANCE_CM] = viewer_distance
+        merged_df[cls.__PIXEL_SIZE_CM] = pixel_size
         return merged_df
 
     @classmethod
