@@ -90,6 +90,9 @@ class IRFDataSetLoader(BaseDataSetLoader):
         # rename columns:
         df.rename(columns={"t": cnst.MILLISECONDS, "evt": cls.__RATER_NAME}, inplace=True)
 
+        # convert to milliseconds:
+        df[cnst.MILLISECONDS] = df[cnst.MILLISECONDS] * 1000
+
         # add a column for trial number:
         # trials are instances that share the same subject id & stimulus.
         trial_counter = 1
