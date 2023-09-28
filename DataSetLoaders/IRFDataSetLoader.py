@@ -16,7 +16,7 @@ from Config.ScreenMonitor import ScreenMonitor
 from Config.GazeEventTypeEnum import get_event_type
 
 
-class HFCDataSetLoader(BaseDataSetLoader):
+class IRFDataSetLoader(BaseDataSetLoader):
     """
     Loads the two datasets presented in articles:
     - (adults) Is human classification by experienced untrained observers a gold standard in fixation detection?
