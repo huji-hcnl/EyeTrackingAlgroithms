@@ -93,6 +93,9 @@ class IRFDataSetLoader(BaseDataSetLoader):
         # convert to milliseconds:
         df[cnst.MILLISECONDS] = df[cnst.MILLISECONDS] * 1000
 
+        # convert x-y coordinates to pixels:
+        # TODO!
+
         # add a column for trial number:
         # trials are instances that share the same subject id & stimulus.
         trial_counter = 1
