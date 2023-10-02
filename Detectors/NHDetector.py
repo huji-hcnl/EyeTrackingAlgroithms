@@ -12,7 +12,7 @@ class NHDetector(BaseDetector):
     __DEFAULT_ALPHA = 0.7
     __DEFAULT_BETA = 0.3
     __MIN_SACCADE_DURATION = 10  # ms
-    __MIN_FIXATION_DURATION = 40  # ms
+    __MIN_FIXATION_DURATION = 55  # ms
 
     def __init__(self, sr: float,
                  pixel_size: float,
@@ -116,8 +116,8 @@ class NHDetector(BaseDetector):
                 # calculate the current sample's threshold in a time window od 40 ms
                 window_ending_index = NHDetector._find_window_end_index(saccade_offset_index, 40.0, timestamps)
                 velocities_window = angular_velocities[saccade_offset_index: window_ending_index + 1]
-                # TODO DECIDE WHICH OPTION
-                # option 1 - calculate mean and std on ALL samples in the window
+
+                # calculate mean and std on ALL samples in the window
                 window_mean = np.mean(velocities_window)
                 window_std = np.std(velocities_window)
                 saccade_offset_threshold = self._alpha * saccade_onset_threshold + self._beta * \
@@ -125,15 +125,6 @@ class NHDetector(BaseDetector):
                 if angular_velocities[saccade_offset_index] < saccade_offset_threshold:
                     break
 
-                # option 2 - calculate m & s on window samples that are below the current potential offset
-                # below_current_sample = velocities_window[velocities_window < angular_velocities[saccade_offset_index]]
-                # # if there is saccade until the end of array, so there aren't samples below the current one
-                # if len(below_current_sample) != 0:
-                #     saccade_offset_threshold = self._alpha * saccade_onset_threshold + self._beta * \
-                #                                (np.mean(below_current_sample) + 3 * np.std(below_current_sample))
-                #     # if local minimum and below threshold = offset
-                #     if angular_velocities[saccade_offset_index] < saccade_offset_threshold:
-                #         break
             saccade_offset_index += 1
         else:
             saccade_offset_index = len(angular_velocities) - 1
@@ -196,7 +187,6 @@ class NHDetector(BaseDetector):
             mean_of_below_samples = np.mean(samples_below_last_threshold)
             std_of_below_samples = np.std(samples_below_last_threshold)
             current_PT = mean_of_below_samples + 6 * std_of_below_samples
-
 
         return current_PT, mean_of_below_samples, std_of_below_samples
 
