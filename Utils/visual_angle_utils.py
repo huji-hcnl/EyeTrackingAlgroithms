@@ -6,7 +6,7 @@ import Utils.array_utils as arr_utils
 import Utils.pixel_utils as pixel_utils
 
 
-def visual_angle_to_pixels(deg: float, d: float, pixel_size: float) -> float:
+def visual_angle_to_pixels(deg: float, d: float, pixel_size: float, keep_sign: bool = False) -> float:
     """
     Calculates the number of pixels that correspond to a visual angle `deg` degrees, given that the viewer is sitting at
     a distance of `d` centimeters from the screen, and that the size of each pixel is `pixel_size` centimeters.
@@ -17,6 +17,7 @@ def visual_angle_to_pixels(deg: float, d: float, pixel_size: float) -> float:
     :param deg: the visual angle (in degrees).
     :param d: the distance (in cm) from the screen.
     :param pixel_size: the size (of the diagonal) of a pixel (in cm).
+    :param keep_sign: if True, returns a negative number if `deg` is negative. Otherwise, returns the absolute value.
 
     :return: the number of pixels that correspond to the given visual angle. If `deg` is not finite, returns np.nan.
     """
@@ -24,6 +25,8 @@ def visual_angle_to_pixels(deg: float, d: float, pixel_size: float) -> float:
         return np.nan
     half_edge = d * np.tan(np.deg2rad(abs(deg) / 2))  # in cm
     edge_pixels = 2 * half_edge / pixel_size  # edge size in pixels
+    if keep_sign:
+        return np.sign(deg) * edge_pixels
     return edge_pixels
 
 
