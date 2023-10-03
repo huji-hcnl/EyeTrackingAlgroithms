@@ -22,6 +22,9 @@ class IRFDataSetLoader(BaseDataSetLoader):
     Using machine learning to detect events in eye-tracking data. Zemblys et al. (2018).
     See also about the repro study: https://github.com/r-zemblys/irf/blob/master/doc/IRF_replication_report.pdf
 
+    Note: binocular data was recorded but only one pair of (x, y) coordinates is provided.
+    For the sake of consistency, we will consider these right-eye coordinates.
+
     This loader is based on a previous implementation, see article:
     Startsev, M., Zemblys, R. Evaluating Eye Movement Event Detection: A Review of the State of the Art. Behav Res 55, 1653–1714 (2023)
     See their implementation: https://github.com/r-zemblys/EM-event-detection-evaluation/blob/main/misc/data_parsers/humanFixationClassification.py
@@ -80,6 +83,9 @@ class IRFDataSetLoader(BaseDataSetLoader):
         merged_df[cnst.STIMULUS] = stimulus
         merged_df[cls.__VIEWER_DISTANCE_CM] = viewer_distance
         merged_df[cls.__PIXEL_SIZE_CM] = pixel_size
+
+        # convert the unambiguous `x` and `y` columns to `right_x` and `right_y`:
+        merged_df.rename(columns={"x": cnst.RIGHT_X, "y": cnst.RIGHT_Y}, inplace=True)
         return merged_df
 
     @classmethod
