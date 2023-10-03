@@ -57,9 +57,7 @@ class IRFDataSetLoader(BaseDataSetLoader):
             file = zip_file.open(f)
             gaze_data = pd.DataFrame(np.load(file))
 
-            # only use events 1, 2, 3 (fixations, saccades, PSOs)
-            mask = gaze_data["evt"].isin([1, 2, 3])
-            gaze_data.loc[~mask, "evt"] = 0
+            # convert gaze events from int to GazeEventTypeEnum
             gaze_data['evt'] = gaze_data['evt'].apply(lambda x: get_event_type(x))
 
             _, file_name, _ = ioutils.split_path(f)
