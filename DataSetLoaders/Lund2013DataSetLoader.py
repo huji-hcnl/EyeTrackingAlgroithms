@@ -81,11 +81,6 @@ class Lund2013DataSetLoader(BaseDataSetLoader):
                 existing_df[rater] = gaze_data[rater]
                 dataframes[(subject_id, stimulus_type, stimulus_name)] = existing_df
 
-            # convert the rater's labels to GazeEventTypeEnum
-            tmp_df = dataframes[(subject_id, stimulus_type, stimulus_name)]
-            tmp_df[rater] = tmp_df[rater].apply(lambda x: get_event_type(x))
-            dataframes[(subject_id, stimulus_type, stimulus_name)] = tmp_df
-
         merged_df = pd.concat(dataframes.values(), ignore_index=True, axis=0)
         return merged_df
 
