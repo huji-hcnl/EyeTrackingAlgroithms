@@ -81,7 +81,10 @@ class TestVisualAngleUtils(unittest.TestCase):
         self.assertTrue(np.isnan(visang_utils.visual_angle_to_pixels(d=self.D, deg=np.inf, pixel_size=self.PS)))
         self.assertEqual(0, visang_utils.visual_angle_to_pixels(d=self.D, deg=0, pixel_size=self.PS))
         self.assertAlmostEqual(2.0, visang_utils.visual_angle_to_pixels(d=self.D, deg=90, pixel_size=self.PS))
-        self.assertAlmostEqual(2.0, visang_utils.visual_angle_to_pixels(d=self.D, deg=-90, pixel_size=self.PS))
+        self.assertAlmostEqual(2.0, visang_utils.visual_angle_to_pixels(d=self.D, deg=-90, pixel_size=self.PS,
+                                                                        keep_sign=False))
+        self.assertAlmostEqual(-2.0, visang_utils.visual_angle_to_pixels(d=self.D, deg=-90, pixel_size=self.PS,
+                                                                        keep_sign=True))
         self.assertAlmostEqual(0.0261814,
                                visang_utils.visual_angle_to_pixels(d=self.D, deg=1.5, pixel_size=self.PS))
 

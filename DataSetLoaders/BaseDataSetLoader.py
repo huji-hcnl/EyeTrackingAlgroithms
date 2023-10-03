@@ -1,8 +1,9 @@
 import pandas as pd
 import requests as req
-
 from abc import ABC, abstractmethod
-from typing import final, List
+from typing import final, List, Dict
+
+import constants as cnst
 
 
 class BaseDataSetLoader(ABC):
@@ -17,7 +18,8 @@ class BaseDataSetLoader(ABC):
         response = cls._download_raw_dataset()
         df = cls._parse_response(response)
         df = cls._clean_data(df)
-        df = df[cls.columns()]  # reorder columns
+        ordered_columns = sorted(df.columns, key=lambda col: cls.column_order().get(col, 10))
+        df = df[ordered_columns]  # reorder columns
         return df
 
     @classmethod
@@ -38,10 +40,11 @@ class BaseDataSetLoader(ABC):
         return cls._ARTICLES
 
     @classmethod
-    @abstractmethod
-    def columns(cls) -> List[str]:
-        """ Specifies the columns of the DataFrame that is returned by the `load` method """
-        raise NotImplementedError
+    def column_order(cls) -> Dict[str, float]:
+        return {cnst.TRIAL: 0.1, cnst.SUBJECT_ID: 0.2, cnst.STIMULUS: 0.3,
+                cnst.MILLISECONDS: 1.1, cnst.X: 1.2, cnst.Y: 1.3,
+                cnst.LEFT_X: 2.1, cnst.LEFT_Y: 2.2, cnst.LEFT_PUPIL: 2.3,
+                cnst.RIGHT_X: 3.1, cnst.RIGHT_Y: 3.2, cnst.RIGHT_PUPIL: 3.3}
 
     @classmethod
     @abstractmethod

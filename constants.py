@@ -22,9 +22,10 @@ MICROSECONDS = "microseconds"
 EVENT_TYPE = "event_type"
 SAMPLING_RATE = "sampling_rate"
 
+X, Y = 'x', 'y'
 LEFT = "left"
 RIGHT = "right"
 PUPIL = "pupil"
-LEFT_X, RIGHT_X = f"{LEFT}_x", f"{RIGHT}_x"
-LEFT_Y, RIGHT_Y = f"{LEFT}_y", f"{RIGHT}_y"
+LEFT_X, RIGHT_X = f"{LEFT}_{X}", f"{RIGHT}_{X}"
+LEFT_Y, RIGHT_Y = f"{LEFT}_{Y}", f"{RIGHT}_{Y}"
 LEFT_PUPIL, RIGHT_PUPIL = f"{LEFT}_{PUPIL}", f"{RIGHT}_{PUPIL}"

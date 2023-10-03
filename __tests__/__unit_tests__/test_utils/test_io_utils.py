@@ -21,3 +21,10 @@ class TestIOUtils(unittest.TestCase):
         ioutils.delete_directory(test_dirpath)
         self.assertFalse(os.path.exists(test_dirpath))
         self.assertFalse(os.path.exists(test_filepath))
+
+    def test_split_path(self):
+        mock_path = "C:\\Users\\user\\Desktop\\test_file.txt"
+        path, filename, extension = ioutils.split_path(mock_path)
+        self.assertEqual(path, "C:\\Users\\user\\Desktop")
+        self.assertEqual(filename, "test_file")
+        self.assertEqual(extension, ".txt")
