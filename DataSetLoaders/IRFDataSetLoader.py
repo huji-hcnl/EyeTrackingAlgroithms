@@ -18,11 +18,9 @@ from Config.GazeEventTypeEnum import get_event_type
 
 class IRFDataSetLoader(BaseDataSetLoader):
     """
-    Loads the two datasets presented in articles:
-    - (adults) Is human classification by experienced untrained observers a gold standard in fixation detection?
-        Hooge et al. (2018)
-    - (infants) An in-depth look at saccadic search in infancy.
-        Hessels et al. (2016)
+    Loads the dataset from a replication study of the article:
+    Using machine learning to detect events in eye-tracking data. Zemblys et al. (2018).
+    See also about the repro study: https://github.com/r-zemblys/irf/blob/master/doc/IRF_replication_report.pdf
 
     This loader is based on a previous implementation, see article:
     Startsev, M., Zemblys, R. Evaluating Eye Movement Event Detection: A Review of the State of the Art. Behav Res 55, 1653–1714 (2023)
