@@ -37,9 +37,15 @@ class IRFDataSetLoader(BaseDataSetLoader):
         "learning to detect events in eye-tracking data. Behavior Research Methods, 50(1), 160–181 (2018)."
     ]
 
+    __RATER_NAME = "RZ"
     __PIXEL_SIZE_CM = "pixel_size_cm"
     __VIEWER_DISTANCE_CM = "viewer_distance_cm"
-    __RATER_NAME = "RZ"
+
+    # Values used in the apparatus of the experiment.
+    # see https://github.com/r-zemblys/irf/blob/master/etdata/lookAtPoint_EL/db_config.json
+    __STIMULUS_VAL = "moving_dot"  # all subjects were shown the same 13-point moving dot stimulus
+    __VIEWER_DISTANCE_CM_VAL = 56.5
+    __SCREEN_MONITOR = ScreenMonitor(width=1920, height=1080, resolution=(1920, 1080), refresh_rate=60)
 
     @classmethod
     def column_order(cls) -> Dict[str, float]:
@@ -68,21 +74,12 @@ class IRFDataSetLoader(BaseDataSetLoader):
             subject_id = file_name.split('_')[-1]  # format: "lookAtPoint_EL_S<subject_num>"
             gaze_data[cnst.SUBJECT_ID] = subject_id
             gaze_dfs.append(gaze_data)
-
         merged_df = pd.concat(gaze_dfs, ignore_index=True, axis=0)
 
         # add meta data columns:
-        config_file = psx.join(prefix, "db_config.json")
-        config = json.load(zip_file.open(config_file))['geom']
-        stimulus = "moving_dot"  # all subjects were shown the same 13-point moving dot stimulus
-        viewer_distance = config['eye_distance'] / 10  # convert to cm
-        pixel_size = ScreenMonitor.calculate_pixel_size(width=config['screen_width'] / 10,
-                                                        height=config['screen_height'] / 10,
-                                                        resolution=(config['display_width_pix'],
-                                                                    config['display_height_pix']))
-        merged_df[cnst.STIMULUS] = stimulus
-        merged_df[cls.__VIEWER_DISTANCE_CM] = viewer_distance
-        merged_df[cls.__PIXEL_SIZE_CM] = pixel_size
+        merged_df[cnst.STIMULUS] = cls.__STIMULUS_VAL
+        merged_df[cls.__VIEWER_DISTANCE_CM] = cls.__VIEWER_DISTANCE_CM_VAL
+        merged_df[cls.__PIXEL_SIZE_CM] = cls.__SCREEN_MONITOR.pixel_size
         return merged_df
 
     @classmethod
