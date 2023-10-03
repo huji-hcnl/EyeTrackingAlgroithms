@@ -87,10 +87,11 @@ class IRFDataSetLoader(BaseDataSetLoader):
 
     @classmethod
     def _clean_data(cls, df: pd.DataFrame) -> pd.DataFrame:
-        # rename columns:
-        # replace `t` with `milliseconds` and `evt` with `rater_name`, and `x` and `y` with `right_x` and `right_y`
+        # rename columns: replace `t` with `milliseconds`, `evt` with `rater_name`, and change the unambiguous `x` and
+        # `y` with `right_x` and `right_y`. also, drop the `status` column that indicates whether the data is valid.
         df.rename(columns={"t": cnst.MILLISECONDS, "evt": cls.__RATER_NAME, "x": cnst.RIGHT_X, "y": cnst.RIGHT_Y},
                   inplace=True)
+        df.drop(columns=["status"], inplace=True)
 
         # convert to milliseconds:
         df[cnst.MILLISECONDS] = df[cnst.MILLISECONDS] * 1000
