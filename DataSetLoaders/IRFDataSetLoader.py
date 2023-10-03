@@ -11,6 +11,7 @@ from typing import Tuple, Dict
 
 import constants as cnst
 import Utils.io_utils as ioutils
+import Utils.visual_angle_utils as vis_utils
 from DataSetLoaders.BaseDataSetLoader import BaseDataSetLoader
 from Config.ScreenMonitor import ScreenMonitor
 from Config.GazeEventTypeEnum import get_event_type
@@ -98,8 +99,10 @@ class IRFDataSetLoader(BaseDataSetLoader):
         # convert to milliseconds:
         df[cnst.MILLISECONDS] = df[cnst.MILLISECONDS] * 1000
 
-        # convert x-y coordinates to pixels:
-        # TODO!
+        # convert x-y coordinates to pixels (use apparatus values):
+        x, y = cls.__convert_coordinates(x=df[cnst.RIGHT_X], y=df[cnst.RIGHT_Y])
+        df[cnst.RIGHT_X] = x
+        df[cnst.RIGHT_Y] = y
 
         # add a column for trial number:
         # trials are instances that share the same subject id & stimulus.
@@ -110,3 +113,16 @@ class IRFDataSetLoader(BaseDataSetLoader):
             trial_counter += 1
         df[cnst.TRIAL] = df[cnst.TRIAL].astype(int)
         return df
+
+    @classmethod
+    def __convert_coordinates(cls, x: pd.Series, y: pd.Series) -> Tuple[pd.Series, pd.Series]:
+        pixel_width = cls.__SCREEN_MONITOR.width / cls.__SCREEN_MONITOR.resolution[0]  # in cm
+        x = x.apply(lambda deg: vis_utils.visual_angle_to_pixels(deg=deg, d=cls.__VIEWER_DISTANCE_CM_VAL,
+                                                                 pixel_size=pixel_width, keep_sign=True))
+        x += cls.__SCREEN_MONITOR.resolution[0] // 2  # move x=0 coordinate to the top of the screen
+
+        pixel_height = cls.__SCREEN_MONITOR.height / cls.__SCREEN_MONITOR.resolution[1]  # in cm
+        y = y.apply(lambda deg: vis_utils.visual_angle_to_pixels(deg=deg, d=cls.__VIEWER_DISTANCE_CM_VAL,
+                                                                 pixel_size=pixel_height, keep_sign=True))
+        y += cls.__SCREEN_MONITOR.resolution[1] // 2  # move y=0 coordinate to the top of the screen
+        return x, y
