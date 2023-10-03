@@ -87,6 +87,11 @@ class IRFDataSetLoader(BaseDataSetLoader):
 
     @classmethod
     def _clean_data(cls, df: pd.DataFrame) -> pd.DataFrame:
+        # replace invalid samples with NaN:
+        idxs_to_replace = df[~df['status']].index
+        df.loc[idxs_to_replace, cnst.X] = np.nan
+        df.loc[idxs_to_replace, cnst.Y] = np.nan
+
         # rename columns: replace `t` with `milliseconds`, `evt` with `rater_name`, and change the unambiguous `x` and
         # `y` with `right_x` and `right_y`. also, drop the `status` column that indicates whether the data is valid.
         df.rename(columns={"t": cnst.MILLISECONDS, "evt": cls.__RATER_NAME, "x": cnst.RIGHT_X, "y": cnst.RIGHT_Y},
