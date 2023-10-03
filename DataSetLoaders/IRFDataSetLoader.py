@@ -60,6 +60,7 @@ class IRFDataSetLoader(BaseDataSetLoader):
             # convert gaze events from int to GazeEventTypeEnum
             gaze_data['evt'] = gaze_data['evt'].apply(lambda x: get_event_type(x))
 
+            # extract subject id:
             _, file_name, _ = ioutils.split_path(f)
             subject_id = file_name.split('_')[-1]  # format: "lookAtPoint_EL_S<subject_num>"
             gaze_data[cnst.SUBJECT_ID] = subject_id
