@@ -83,15 +83,14 @@ class IRFDataSetLoader(BaseDataSetLoader):
         merged_df[cnst.STIMULUS] = stimulus
         merged_df[cls.__VIEWER_DISTANCE_CM] = viewer_distance
         merged_df[cls.__PIXEL_SIZE_CM] = pixel_size
-
-        # convert the unambiguous `x` and `y` columns to `right_x` and `right_y`:
-        merged_df.rename(columns={"x": cnst.RIGHT_X, "y": cnst.RIGHT_Y}, inplace=True)
         return merged_df
 
     @classmethod
     def _clean_data(cls, df: pd.DataFrame) -> pd.DataFrame:
         # rename columns:
-        df.rename(columns={"t": cnst.MILLISECONDS, "evt": cls.__RATER_NAME}, inplace=True)
+        # replace `t` with `milliseconds` and `evt` with `rater_name`, and `x` and `y` with `right_x` and `right_y`
+        df.rename(columns={"t": cnst.MILLISECONDS, "evt": cls.__RATER_NAME, "x": cnst.RIGHT_X, "y": cnst.RIGHT_Y},
+                  inplace=True)
 
         # convert to milliseconds:
         df[cnst.MILLISECONDS] = df[cnst.MILLISECONDS] * 1000
