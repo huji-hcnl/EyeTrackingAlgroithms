@@ -25,6 +25,9 @@ class NHDetector(BaseDetector):
                  min_saccade_duration: float = __MIN_SACCADE_DURATION,
                  min_fixation_duration: float = __MIN_FIXATION_DURATION):
         super().__init__()
+        if sr <= 0 or view_dist <= 0 or window_length <= 0 or poly_order <= 0 or alpha <=0 or beta <= 0 or \
+                min_fixation_duration <= 0 or min_fixation_duration <= 0:
+            raise ValueError("all parameters must be positive")
         self._pixel_size = pixel_size
         self._view_dist = view_dist
         self._timestamps = timestamps

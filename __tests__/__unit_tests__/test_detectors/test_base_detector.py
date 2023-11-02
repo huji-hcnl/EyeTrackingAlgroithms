@@ -3,6 +3,8 @@ import numpy as np
 
 from Detectors.EngbertDetector import EngbertDetector
 from Config.GazeEventTypeEnum import GazeEventTypeEnum
+from DataSetLoaders.Lund2013DataSetLoader import Lund2013DataSetLoader
+import constants as cnst
 
 
 class TestBaseDetector(unittest.TestCase):
@@ -12,6 +14,22 @@ class TestBaseDetector(unittest.TestCase):
 
     DETECTOR = EngbertDetector(lambda_noise_threshold=_LAMBDA, derivation_window_size=_WS)
     DETECTOR._sr = _SR
+
+    def setUp(self) -> None:
+        # data = LoadAnderssonData.load_from_url()
+        self.data = Lund2013DataSetLoader.download()
+
+        self.pixel_size = self.data["pixel_size_cm"][0]
+        self.view_dist = self.data["viewer_distance_cm"][0]
+        self.labels = np.array(self.data[cnst.EVENT_TYPE])
+        self.x_coords = np.array(self.data[cnst.RIGHT_X])
+        self.y_coords = np.array(self.data[cnst.RIGHT_Y])
+        self.timestamps = np.array(self.data[cnst.MILLISECONDS])
+        self.sr = TestBaseDetector._SR
+
+    def test_algorithm(self):
+        # Implement for each algorithm individually
+        pass
 
     def test_set_short_chunks_as_undefined(self):
         arr = np.array([])
