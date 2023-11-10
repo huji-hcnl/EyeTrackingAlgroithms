@@ -14,6 +14,8 @@ class IDTDetector(BaseDetector):
                  dispersion_threshold: float = __DEFAULT_DISPERSION_THRESHOLD_ANGLE,
                  window_duration: int = __DEFAULT_WINDOW_DURATION):
         super().__init__(missing_value)
+        if viewer_distance <= 0 or pixel_size <= 0 or dispersion_threshold <= 0 or window_duration <= 0:
+            raise ValueError("all parameters must be positive")
         # visual angle to pixels
         self._dispersion_threshold_pixels = visual_angle_utils.visual_angle_to_pixels(dispersion_threshold,
                                                                                       viewer_distance, pixel_size)

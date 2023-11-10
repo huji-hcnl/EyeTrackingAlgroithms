@@ -1,5 +1,5 @@
 import unittest
-from Detectors.NHDetector import NHDetector
+from Detectors.IDTDetector import IDTDetector
 from sklearn.metrics import confusion_matrix
 import pandas as pd
 import constants as cnst
@@ -7,18 +7,16 @@ from sklearn.metrics import mean_squared_error
 from test_base_detector import TestBaseDetector
 
 
-class TestNHDetector(TestBaseDetector):
+class TestIDTDetector(TestBaseDetector):
     def setUp(self) -> None:
         super().setUp()
 
     def test_init(self):
         with self.assertRaises(ValueError):
-            NHDetector(sr=-1 * self.sr, pixel_size=self.pixel_size, view_dist=self.view_dist,
-                       timestamps=self.timestamps)
+            IDTDetector(viewer_distance=self.view_dist, pixel_size=self.pixel_size)
 
     def test_algorithm(self):
-        detect_obj = NHDetector(sr=self.sr, pixel_size=self.pixel_size, view_dist=self.view_dist,
-                                timestamps=self.timestamps)
+        detect_obj = IDTDetector(viewer_distance=self.view_dist, pixel_size=self.pixel_size)
         # Implement NH-specific test logic
         candidates = detect_obj.detect_candidates_monocular(self.timestamps, self.x_coords, self.y_coords)
         confusion_mat = confusion_matrix(self.labels, candidates)
@@ -35,7 +33,7 @@ class TestNHDetector(TestBaseDetector):
         # # Group by the DataFrame by the "stimulus" column
         grouped = self.data.groupby([cnst.EVENT_TYPE, 'stimulus'])
         mse = grouped.apply(lambda x: mean_squared_error(x['candidates'], x[cnst.EVENT_TYPE]))
-        print(mse)
+        print("mse: ", mse)
 
 
 if __name__ == '__main__':
