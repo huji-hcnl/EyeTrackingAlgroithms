@@ -10,10 +10,9 @@ class IDTDetector(BaseDetector):
     __DEFAULT_WINDOW_DURATION = 100  # ms- size of the duration time window = minimum allowed fixation duration
 
     def __init__(self, viewer_distance: float, pixel_size: float,
-                 missing_value: float = BaseDetector._MISSING_VALUE,
                  dispersion_threshold: float = __DEFAULT_DISPERSION_THRESHOLD_ANGLE,
                  window_duration: int = __DEFAULT_WINDOW_DURATION):
-        super().__init__(missing_value)
+        super().__init__()
         if viewer_distance <= 0 or pixel_size <= 0 or dispersion_threshold <= 0 or window_duration <= 0:
             raise ValueError("all parameters must be positive")
         # visual angle to pixels

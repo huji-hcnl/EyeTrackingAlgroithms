@@ -38,9 +38,7 @@ class NHDetector(BaseDetector):
         self._min_saccade_duration = min_saccade_duration
         self._min_fixation_duration = min_fixation_duration
 
-    def _identify_gaze_event_candidates(self, x: np.ndarray,
-                                        y: np.ndarray,
-                                        candidates: List[GazeEventTypeEnum]) -> List[GazeEventTypeEnum]:
+    def _identify_gaze_event_candidates(self, x: np.ndarray, y: np.ndarray, candidates: np.ndarray) -> np.ndarray:
         candidates = np.array(candidates)
         blinks_indexes = np.where(candidates == GazeEventTypeEnum.BLINK)[0]
         # step 1 - filtering, denoising and calculating angular velocities and accelerations
@@ -72,7 +70,7 @@ class NHDetector(BaseDetector):
         for blink in blinks_indexes:
             candidates[blink] = GazeEventTypeEnum.BLINK
 
-        return list(candidates)
+        return candidates
 
     def _filter_and_denoise(self, x, y, view_dist, pixel_size, timestamps):
         x_filtered = savgol_filter(x, window_length=self._window_length, polyorder=self._poly_order)
