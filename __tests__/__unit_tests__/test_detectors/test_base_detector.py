@@ -1,5 +1,7 @@
 import unittest
 import numpy as np
+import pandas as pd
+from sklearn.metrics import confusion_matrix, mean_squared_error, accuracy_score
 
 from Detectors.EngbertDetector import EngbertDetector
 from Config.GazeEventTypeEnum import GazeEventTypeEnum
@@ -30,6 +32,27 @@ class TestBaseDetector(unittest.TestCase):
     def test_algorithm(self):
         # Implement for each algorithm individually
         pass
+
+    def evaluate_performance(self, candidates):
+        confusion_mat = confusion_matrix(self.labels, candidates)
+        row_labels = ["undefined_gt", "fixation_gt", "saccade_gt", "pso_gt", "smooth_pursuit_gt", "blink_gt"]
+        column_labels = ["undefined_alg", "fixation_alg", "saccade_alg", "pso_alg", "smooth_pursuit_alg", "blink_alg"]
+
+        confusion_df = pd.DataFrame(confusion_mat, index=row_labels, columns=column_labels)
+        pd.set_option('display.max_rows', None)
+        pd.set_option('display.max_columns', None)
+        print(confusion_df)
+
+        # calculate rmsd for each type of stimulus
+        self.data['candidates'] = candidates
+        # # Group by the DataFrame by the "stimulus" column
+        grouped = self.data.groupby([cnst.EVENT_TYPE, 'stimulus'])
+        mse = grouped.apply(lambda x: mean_squared_error(x['candidates'], x[cnst.EVENT_TYPE]))
+        print(mse)
+
+        grouped_2 = self.data.groupby(cnst.EVENT_TYPE)
+        accuracy = grouped_2.apply(lambda x: accuracy_score(x['candidates'], x[cnst.EVENT_TYPE]))
+        print("accuracy: ", accuracy)
 
     def test_set_short_chunks_as_undefined(self):
         arr = np.array([])
