@@ -17,8 +17,8 @@ class IVTDetector(BaseDetector):
         # calculate velocity by difference between coordinates
         candidates = np.array(candidates)
 
-        diff_x = np.diff(x)
-        diff_y = np.diff(y)
+        diff_x = np.concatenate(([np.nan], np.diff(x)))  # first diff is NaN
+        diff_y = np.concatenate(([np.nan], np.diff(y)))  # first diff is NaN
 
         # we assume that the frequency is 500Hz so there is 2ms gap between every two samples
         velocity = np.sqrt(np.power(diff_x, 2) + np.power(diff_y, 2)) / 2
